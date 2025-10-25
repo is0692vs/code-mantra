@@ -1,9 +1,9 @@
 {
   "name": "code-mantra",
-  "publisher": "is0692vs",
+  "publisher": "hirokimukai",
   "displayName": "Code Mantra",
   "description": "Remind yourself of programming principles with customizable notifications",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "icon": "images/icon.png",
   "galleryBanner": {
     "color": "#1e1e1e",
