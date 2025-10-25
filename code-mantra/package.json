@@ -1,8 +1,8 @@
 {
   "name": "code-mantra",
   "displayName": "code-mantra",
-  "description": "",
-  "version": "0.0.1",
+  "description": "Remind yourself of programming principles with customizable notifications",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.105.0"
   },
