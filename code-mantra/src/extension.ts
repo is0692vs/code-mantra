@@ -2,21 +2,20 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 
+interface NotificationRule {
+	trigger: string;
+	message: string;
+	filePattern: string;
+}
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "code-mantra" is now active!');
+	console.log("[code-mantra] Extension is now active!");
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
 	const disposable = vscode.commands.registerCommand(
 		"code-mantra.helloWorld",
 		() => {
-			// The code you place here will be executed every time your command is executed
-			// Display a message box to the user
 			vscode.window.showInformationMessage("Hello World from code-mantra!");
 		}
 	);
@@ -26,11 +25,24 @@ export function activate(context: vscode.ExtensionContext) {
 	// ファイル保存イベントリスナーを登録
 	const saveListener = vscode.workspace.onDidSaveTextDocument((document) => {
 		console.log(`[code-mantra] File saved: ${document.fileName}`);
-		if (shouldShowNotification(document)) {
-			console.log(`[code-mantra] Showing notification for: ${document.fileName}`);
-			showMantraNotification();
+
+		if (!isExtensionEnabled()) {
+			console.log("[code-mantra] Extension is disabled");
+			return;
+		}
+
+		const rules = getRules();
+		const matchingRules = rules.filter((rule) =>
+			matchesPattern(document.fileName, rule.filePattern)
+		);
+
+		if (matchingRules.length > 0) {
+			const randomRule =
+				matchingRules[Math.floor(Math.random() * matchingRules.length)];
+			console.log(`[code-mantra] Showing notification: ${randomRule.message}`);
+			showNotification(randomRule.message);
 		} else {
-			console.log(`[code-mantra] Skipping notification for: ${document.fileName}`);
+			console.log(`[code-mantra] No matching rules for: ${document.fileName}`);
 		}
 	});
 
@@ -38,42 +50,55 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 /**
- * 通知を表示すべきかどうかを判定する
- * @param document 保存されたテキストドキュメント
- * @returns 通知を表示すべき場合true
+ * 拡張機能が有効かチェックする
+ * @returns 有効な場合true
  */
-function shouldShowNotification(document: vscode.TextDocument): boolean {
-	// 対象拡張子のリスト
-	const targetExtensions = [
-		".ts",
-		".js",
-		".tsx",
-		".jsx",
-		".py",
-		".java",
-		".go",
-		".rs",
-		".cpp",
-		".c",
-		".cs",
-	];
-
-	// ファイルパスから拡張子を取得
-	const filePath = document.fileName;
-	const extension = filePath.substring(filePath.lastIndexOf("."));
-
-	console.log(`[code-mantra] Checking extension: ${extension}`);
-
-	// 対象拡張子に含まれているかチェック
-	return targetExtensions.includes(extension);
+function isExtensionEnabled(): boolean {
+	const config = vscode.workspace.getConfiguration("codeMantra");
+	return config.get("enabled", true);
 }
 
 /**
- * マントラ通知を表示する
+ * ルール配列を取得する
+ * @returns ルール配列
  */
-function showMantraNotification(): void {
-	console.log("[code-mantra] Displaying notification: ETC? (Easier To Change?)");
-	vscode.window.showInformationMessage("ETC? (Easier To Change?)");
+function getRules(): NotificationRule[] {
+	const config = vscode.workspace.getConfiguration("codeMantra");
+	const rules = config.get("rules", []);
+	console.log("[code-mantra] Retrieved rules:", JSON.stringify(rules));
+	return rules;
+}
+
+/**
+ * ファイルパスがパターンにマッチするかチェックする
+ * @param filePath ファイルパス
+ * @param pattern ファイルパターン（glob形式）
+ * @returns マッチする場合true
+ */
+function matchesPattern(filePath: string, pattern: string): boolean {
+	// パターンから拡張子リストを抽出
+	// 例：**/*.{ts,js,tsx,jsx} → ['.ts', '.js', '.tsx', '.jsx']
+	const extMatch = pattern.match(/\{([^}]+)\}/);
+	if (!extMatch) {
+		return false;
+	}
+
+	const extensions = extMatch[1].split(",").map((ext) => "." + ext.trim());
+	const fileExtension = filePath.substring(filePath.lastIndexOf("."));
+
+	console.log(
+		`[code-mantra] Checking pattern: ${pattern}, file extension: ${fileExtension}`
+	);
+
+	return extensions.includes(fileExtension);
+}
+
+/**
+ * 通知メッセージを表示する
+ * @param message メッセージ
+ */
+function showNotification(message: string): void {
+	vscode.window.showInformationMessage(message);
 }
 
 // This method is called when your extension is deactivated
