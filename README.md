@@ -59,6 +59,7 @@ Configure when notifications should appear:
 ```
 
 **Available Triggers:**
+
 - `onSave`: Show notification when saving files (default: enabled)
 - `onEdit`: Show notification while editing after a delay (default: disabled, 5 seconds delay)
 - `onOpen`: Show notification when opening files (default: disabled)
