@@ -13,7 +13,7 @@ out/**/*.d.ts
 
 # VS Code
 .vscode/
-.vscode-test.mjs
+
 
 # IDE and editor
 .idea/
