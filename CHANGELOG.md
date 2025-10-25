@@ -9,6 +9,7 @@ All notable changes to the "code-mantra" extension will be documented in this fi
 - Updated publisher to hirokimukai
 - Fixed test suite extension ID references
 - Added CI/CD workflows for automated releases
+- Added proper permissions to GitHub Actions workflows
 
 ## [0.1.0] - 2025-10-25
 
