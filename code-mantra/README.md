@@ -81,6 +81,52 @@ npm install
 # Press F5 in VS Code
 ```
 
+## Publishing
+
+This project uses GitHub Actions for automated releases and marketplace publishing.
+
+### Release Workflow (GitHub Release Only)
+
+Triggered by `v*` tags (e.g., `v0.1.0`):
+
+```bash
+# 1. Update version in package.json and CHANGELOG.md
+# 2. Commit changes
+git add -A && git commit -m "Release v0.1.0"
+
+# 3. Create and push tag (triggers release.yml)
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+This creates a GitHub Release with the packaged VSIX file.
+
+### Publish Workflow (GitHub Release + Marketplace)
+
+Triggered by `v*-publish` tags (e.g., `v0.1.0-publish`):
+
+```bash
+# After creating a GitHub Release with v0.1.0,
+# trigger marketplace publish with:
+git tag v0.1.0-publish
+git push origin v0.1.0-publish
+```
+
+This creates a GitHub Release and publishes to VS Code Marketplace.
+
+### Workflows
+
+- **release.yml**: `v*` tags → GitHub Release (VSIX attached)
+- **publish.yml**: `v*-publish` tags → GitHub Release + Marketplace publish
+
+## Roadmap
+
+- [ ] Add extension icon (128x128 PNG)
+- [ ] Add demo GIF to README
+- [ ] Support more file types
+- [ ] Add custom message frequency settings
+- [ ] Dark/light mode icons
+
 ## License
 
 MIT
