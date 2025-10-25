@@ -5,6 +5,9 @@ on:
     tags:
       - "v*-publish"
 
+permissions:
+  contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
