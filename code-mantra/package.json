@@ -4,6 +4,7 @@
   "displayName": "Code Mantra",
   "description": "Remind yourself of programming principles with customizable notifications",
   "version": "0.1.0",
+  "icon": "images/icon.png",
   "galleryBanner": {
     "color": "#1e1e1e",
     "theme": "dark"
