@@ -83,15 +83,41 @@ npm install
 
 ## Publishing
 
-To publish a new version:
+This project uses GitHub Actions for automated releases and marketplace publishing.
 
-1. Update `version` in `package.json`
-2. Update `CHANGELOG.md`
-3. Commit changes
-4. Create a git tag: `git tag v0.x.x`
-5. Push tag: `git push origin v0.x.x`
+### Release Workflow (GitHub Release Only)
 
-The GitHub Actions workflow will automatically publish to the Marketplace.
+Triggered by `v*` tags (e.g., `v0.1.0`):
+
+```bash
+# 1. Update version in package.json and CHANGELOG.md
+# 2. Commit changes
+git add -A && git commit -m "Release v0.1.0"
+
+# 3. Create and push tag (triggers release.yml)
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+This creates a GitHub Release with the packaged VSIX file.
+
+### Publish Workflow (GitHub Release + Marketplace)
+
+Triggered by `v*-publish` tags (e.g., `v0.1.0-publish`):
+
+```bash
+# After creating a GitHub Release with v0.1.0, 
+# trigger marketplace publish with:
+git tag v0.1.0-publish
+git push origin v0.1.0-publish
+```
+
+This creates a GitHub Release and publishes to VS Code Marketplace.
+
+### Workflows
+
+- **release.yml**: `v*` tags → GitHub Release (VSIX attached)
+- **publish.yml**: `v*-publish` tags → GitHub Release + Marketplace publish
 
 ## Roadmap
 
