@@ -81,6 +81,26 @@ npm install
 # Press F5 in VS Code
 ```
 
+## Publishing
+
+To publish a new version:
+
+1. Update `version` in `package.json`
+2. Update `CHANGELOG.md`
+3. Commit changes
+4. Create a git tag: `git tag v0.x.x`
+5. Push tag: `git push origin v0.x.x`
+
+The GitHub Actions workflow will automatically publish to the Marketplace.
+
+## Roadmap
+
+- [ ] Add extension icon (128x128 PNG)
+- [ ] Add demo GIF to README
+- [ ] Support more file types
+- [ ] Add custom message frequency settings
+- [ ] Dark/light mode icons
+
 ## License
 
 MIT

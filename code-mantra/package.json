@@ -1,14 +1,39 @@
 {
   "name": "code-mantra",
-  "displayName": "code-mantra",
+  "publisher": "is0692vs",
+  "displayName": "Code Mantra",
   "description": "Remind yourself of programming principles with customizable notifications",
   "version": "0.1.0",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.105.0"
   },
   "categories": [
+    "Programming Languages",
+    "Education",
     "Other"
   ],
+  "keywords": [
+    "coding habits",
+    "programming principles",
+    "reminders",
+    "notifications",
+    "pragmatic programmer",
+    "ETC",
+    "DRY",
+    "clean code"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/is0692vs/code-mantra"
+  },
+  "bugs": {
+    "url": "https://github.com/is0692vs/code-mantra/issues"
+  },
+  "homepage": "https://github.com/is0692vs/code-mantra#readme",
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -76,7 +101,9 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "vsce:package": "vsce package",
+    "vsce:publish": "vsce publish"
   },
   "devDependencies": {
     "@types/vscode": "^1.105.0",
