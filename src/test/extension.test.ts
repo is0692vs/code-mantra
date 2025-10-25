@@ -13,4 +13,27 @@ suite('Extension Test Suite', () => {
 		await ext?.activate();
 		assert.ok(ext?.isActive);
 	});
+
+	test('Should have triggers configuration', () => {
+		const config = vscode.workspace.getConfiguration('codeMantra');
+		const triggers = config.get('triggers');
+		
+		assert.ok(triggers);
+		assert.strictEqual(typeof triggers, 'object');
+	});
+
+	test('Should have fileTypes configuration', () => {
+		const config = vscode.workspace.getConfiguration('codeMantra');
+		const fileTypes = config.get<string[]>('fileTypes');
+		
+		assert.ok(Array.isArray(fileTypes));
+		assert.ok(fileTypes!.length > 0);
+	});
+
+	test('Should have excludePatterns configuration', () => {
+		const config = vscode.workspace.getConfiguration('codeMantra');
+		const excludePatterns = config.get<string[]>('excludePatterns');
+		
+		assert.ok(Array.isArray(excludePatterns));
+	});
 });

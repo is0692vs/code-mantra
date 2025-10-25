@@ -4,12 +4,14 @@ Remind yourself of programming principles with customizable notifications in VS 
 
 ## Features
 
-Code Mantra helps you build better coding habits by showing reminders of programming principles when you save files.
+Code Mantra helps you build better coding habits by showing reminders of programming principles.
 
-- 💡 Customizable notification rules
-- 🎯 File pattern matching (TypeScript, JavaScript, Python, etc.)
-- 🔧 Easy configuration via VS Code settings
-- 📚 Built-in presets: Pragmatic Programmer principles (ETC, DRY)
+- 💡 **Multiple Triggers**: Show notifications on save, edit, open, or focus
+- 🎯 **Customizable File Types**: Choose which languages to monitor
+- 🔧 **Flexible Configuration**: Easy setup via VS Code settings
+- 🚫 **Exclude Patterns**: Ignore specific files or directories
+- 📚 **Built-in Presets**: Pragmatic Programmer principles (ETC, DRY)
+- ⚙️ **Smart Notifications**: Automatic rate limiting to avoid spam
 
 ## Usage
 
@@ -20,11 +22,11 @@ When you save a file, Code Mantra will randomly show one of the configured princ
 - "ETC? (Easier To Change?)" - Is your code easy to change?
 - "DRY? (Don't Repeat Yourself)" - Are you avoiding repetition?
 
-### Configuration
+## Configuration
 
 Open VS Code settings (`Ctrl+,` or `Cmd+,`) and search for "Code Mantra".
 
-#### Enable/Disable
+### Enable/Disable
 
 ```json
 {
@@ -32,7 +34,72 @@ Open VS Code settings (`Ctrl+,` or `Cmd+,`) and search for "Code Mantra".
 }
 ```
 
-#### Custom Rules
+### Triggers
+
+Configure when notifications should appear:
+
+```json
+{
+  "codeMantra.triggers": {
+    "onSave": {
+      "enabled": true
+    },
+    "onEdit": {
+      "enabled": false,
+      "delay": 5000
+    },
+    "onOpen": {
+      "enabled": false
+    },
+    "onFocus": {
+      "enabled": false
+    }
+  }
+}
+```
+
+**Available Triggers:**
+- `onSave`: Show notification when saving files (default: enabled)
+- `onEdit`: Show notification while editing after a delay (default: disabled, 5 seconds delay)
+- `onOpen`: Show notification when opening files (default: disabled)
+- `onFocus`: Show notification when editor gains focus (default: disabled)
+
+### File Types
+
+Specify which programming languages to show notifications for:
+
+```json
+{
+  "codeMantra.fileTypes": [
+    "typescript",
+    "javascript",
+    "python",
+    "java",
+    "go",
+    "rust"
+  ]
+}
+```
+
+**Supported Language IDs:**
+TypeScript, JavaScript, Python, Java, Go, Rust, C, C++, C#, HTML, CSS, SCSS, Vue, Ruby, PHP, Swift, Kotlin, Dart, YAML, JSON
+
+### Exclude Patterns
+
+Exclude specific files or directories from notifications:
+
+```json
+{
+  "codeMantra.excludePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.git/**"
+  ]
+}
+```
+
+### Custom Rules
 
 Add your own rules in `settings.json`:
 
@@ -52,17 +119,6 @@ Add your own rules in `settings.json`:
   ]
 }
 ```
-
-#### Supported File Patterns
-
-- TypeScript: `**/*.{ts,tsx}`
-- JavaScript: `**/*.{js,jsx}`
-- Python: `**/*.py`
-- Java: `**/*.java`
-- Go: `**/*.go`
-- Rust: `**/*.rs`
-- C/C++: `**/*.{c,cpp}`
-- C#: `**/*.cs`
 
 ## Installation
 

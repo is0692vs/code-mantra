@@ -130,7 +130,21 @@
             "rust",
             "cpp",
             "c",
-            "csharp"
+            "csharp",
+            "html",
+            "css",
+            "scss",
+            "sass",
+            "less",
+            "vue",
+            "svelte",
+            "ruby",
+            "php",
+            "swift",
+            "kotlin",
+            "dart",
+            "yaml",
+            "json"
           ],
           "items": {
             "type": "string"
