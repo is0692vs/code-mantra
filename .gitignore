@@ -1,0 +1,34 @@
+# ビルド出力
+out/
+dist/
+*.vsix
+
+# 依存関係
+node_modules/
+
+# テスト関連
+.vscode-test/
+coverage/
+
+# 環境・設定
+.env
+.env.local
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ログ
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# その他
+*.swp
+*.swo
+*~
