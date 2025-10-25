@@ -19,7 +19,50 @@
         "command": "code-mantra.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Code Mantra",
+      "properties": {
+        "codeMantra.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable Code Mantra notifications"
+        },
+        "codeMantra.rules": {
+          "type": "array",
+          "default": [
+            {
+              "trigger": "onSave",
+              "message": "ETC? (Easier To Change?)",
+              "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs}"
+            },
+            {
+              "trigger": "onSave",
+              "message": "DRY? (Don't Repeat Yourself)",
+              "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs}"
+            }
+          ],
+          "description": "List of notification rules",
+          "items": {
+            "type": "object",
+            "properties": {
+              "trigger": {
+                "type": "string",
+                "description": "Trigger type (currently only 'onSave' is supported)"
+              },
+              "message": {
+                "type": "string",
+                "description": "Notification message to display"
+              },
+              "filePattern": {
+                "type": "string",
+                "description": "File pattern to match (glob pattern)"
+              }
+            }
+          }
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
