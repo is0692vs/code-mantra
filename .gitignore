@@ -5,9 +5,11 @@ yarn.lock
 # Build outputs
 dist/
 out/
-*.js
-*.js.map
-*.d.ts
+dist/**/*.js
+dist/**/*.js.map
+out/**/*.js
+out/**/*.js.map
+out/**/*.d.ts
 
 # VS Code
 .vscode/
