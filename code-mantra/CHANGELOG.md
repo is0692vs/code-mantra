@@ -14,3 +14,4 @@ All notable changes to the "code-mantra" extension will be documented in this fi
 - Configuration schema in VS Code settings
 - Basic unit tests
 - Comprehensive README and documentation
+- Extension icon (128x128 PNG)

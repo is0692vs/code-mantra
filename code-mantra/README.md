@@ -121,7 +121,7 @@ This creates a GitHub Release and publishes to VS Code Marketplace.
 
 ## Roadmap
 
-- [ ] Add extension icon (128x128 PNG)
+- [x] Add extension icon (128x128 PNG)
 - [ ] Add demo GIF to README
 - [ ] Support more file types
 - [ ] Add custom message frequency settings
