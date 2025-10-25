@@ -5,6 +5,7 @@ All notable changes to the "code-mantra" extension will be documented in this fi
 ## [0.1.0] - 2025-10-25
 
 ### Added
+
 - Initial release
 - File save notification feature
 - Customizable rules via settings
