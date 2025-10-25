@@ -10,9 +10,15 @@ node_modules/
 .vscode-test/
 coverage/
 
+# TypeScript
+*.tsbuildinfo
+*.js.map
+*.ts.map
+
 # 環境・設定
 .env
 .env.local
+*.code-workspace
 
 # IDE
 .vscode/settings.json
