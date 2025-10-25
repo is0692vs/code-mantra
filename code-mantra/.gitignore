@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+out/
+*.js
+*.js.map
+*.d.ts
+
+# VS Code
+.vscode/
+.vscode-test.mjs
+
+# IDE and editor
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# OS
+Thumbs.db
+.env.local
+.env.*.local
