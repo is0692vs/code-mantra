@@ -1,39 +1,39 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
-      - '!v*-publish'
+    push:
+        tags:
+            - "v*"
+            - "!v*-publish"
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      
-      - name: Install dependencies
-        run: npm install
-      
-      - name: Run tests
-        run: npm test
-      
-      - name: Build
-        run: npm run compile
-      
-      - name: Package extension
-        run: npx vsce package
-      
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: '*.vsix'
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "18"
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Run tests
+              run: npm test
+
+            - name: Build
+              run: npm run compile
+
+            - name: Package extension
+              run: npx vsce package
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: "*.vsix"
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

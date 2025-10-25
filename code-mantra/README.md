@@ -106,7 +106,7 @@ This creates a GitHub Release with the packaged VSIX file.
 Triggered by `v*-publish` tags (e.g., `v0.1.0-publish`):
 
 ```bash
-# After creating a GitHub Release with v0.1.0, 
+# After creating a GitHub Release with v0.1.0,
 # trigger marketplace publish with:
 git tag v0.1.0-publish
 git push origin v0.1.0-publish
