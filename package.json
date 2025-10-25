@@ -54,6 +54,102 @@
           "default": true,
           "description": "Enable or disable Code Mantra notifications"
         },
+        "codeMantra.triggers": {
+          "type": "object",
+          "default": {
+            "onSave": {
+              "enabled": true
+            },
+            "onEdit": {
+              "enabled": false,
+              "delay": 5000
+            },
+            "onOpen": {
+              "enabled": false
+            },
+            "onFocus": {
+              "enabled": false
+            }
+          },
+          "description": "Configure notification triggers",
+          "properties": {
+            "onSave": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Show notifications when saving files"
+                }
+              }
+            },
+            "onEdit": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Show notifications while editing (with delay)"
+                },
+                "delay": {
+                  "type": "number",
+                  "description": "Delay in milliseconds before showing notification",
+                  "default": 5000,
+                  "minimum": 1000
+                }
+              }
+            },
+            "onOpen": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Show notifications when opening files"
+                }
+              }
+            },
+            "onFocus": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Show notifications when editor gains focus"
+                }
+              }
+            }
+          }
+        },
+        "codeMantra.fileTypes": {
+          "type": "array",
+          "default": [
+            "typescript",
+            "javascript",
+            "typescriptreact",
+            "javascriptreact",
+            "python",
+            "java",
+            "go",
+            "rust",
+            "cpp",
+            "c",
+            "csharp"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "List of language IDs to show notifications for"
+        },
+        "codeMantra.excludePatterns": {
+          "type": "array",
+          "default": [
+            "**/node_modules/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/.git/**"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Glob patterns to exclude from notifications"
+        },
         "codeMantra.rules": {
           "type": "array",
           "default": [
@@ -68,24 +164,7 @@
               "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs}"
             }
           ],
-          "description": "List of notification rules",
-          "items": {
-            "type": "object",
-            "properties": {
-              "trigger": {
-                "type": "string",
-                "description": "Trigger type (currently only 'onSave' is supported)"
-              },
-              "message": {
-                "type": "string",
-                "description": "Notification message to display"
-              },
-              "filePattern": {
-                "type": "string",
-                "description": "File pattern to match (glob pattern)"
-              }
-            }
-          }
+          "description": "List of notification rules"
         }
       }
     }

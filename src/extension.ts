@@ -1,105 +1,97 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
+import { TriggerManager } from './triggerManager';
 
-interface NotificationRule {
-	trigger: string;
-	message: string;
-	filePattern: string;
-}
+let triggerManager: TriggerManager | undefined;
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	console.log("[code-mantra] Extension is now active!");
+	console.log('[code-mantra] Extension activated');
 
-	const disposable = vscode.commands.registerCommand(
-		"code-mantra.helloWorld",
-		() => {
-			vscode.window.showInformationMessage("Hello World from code-mantra!");
-		}
+	// TriggerManagerを初期化
+	triggerManager = new TriggerManager(context, handleTrigger);
+	triggerManager.activate();
+
+	// 設定変更時に再初期化
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeConfiguration((event) => {
+			if (event.affectsConfiguration('codeMantra')) {
+				console.log('[code-mantra] Configuration changed, reactivating triggers');
+				triggerManager?.deactivate();
+				triggerManager = new TriggerManager(context, handleTrigger);
+				triggerManager.activate();
+			}
+		})
 	);
-
-	context.subscriptions.push(disposable);
-
-	// ファイル保存イベントリスナーを登録
-	const saveListener = vscode.workspace.onDidSaveTextDocument((document) => {
-		console.log(`[code-mantra] File saved: ${document.fileName}`);
-
-		if (!isExtensionEnabled()) {
-			console.log("[code-mantra] Extension is disabled");
-			return;
-		}
-
-		const rules = getRules();
-		const matchingRules = rules.filter((rule) =>
-			matchesPattern(document.fileName, rule.filePattern)
-		);
-
-		if (matchingRules.length > 0) {
-			const randomRule =
-				matchingRules[Math.floor(Math.random() * matchingRules.length)];
-			console.log(`[code-mantra] Showing notification: ${randomRule.message}`);
-			showNotification(randomRule.message);
-		} else {
-			console.log(`[code-mantra] No matching rules for: ${document.fileName}`);
-		}
-	});
-
-	context.subscriptions.push(saveListener);
 }
 
-/**
- * 拡張機能が有効かチェックする
- * @returns 有効な場合true
- */
+export function deactivate() {
+	triggerManager?.deactivate();
+	console.log('[code-mantra] Extension deactivated');
+}
+
+function handleTrigger(document: vscode.TextDocument): void {
+	if (!isExtensionEnabled()) {
+		return;
+	}
+
+	if (!shouldProcessDocument(document)) {
+		return;
+	}
+
+	const rules = getRules();
+	const matchingRules = rules.filter(() => true); // 全ルールを対象（filePatternチェックは削除）
+
+	if (matchingRules.length > 0) {
+		const randomRule = matchingRules[Math.floor(Math.random() * matchingRules.length)];
+		showNotification(randomRule.message);
+	}
+}
+
 function isExtensionEnabled(): boolean {
-	const config = vscode.workspace.getConfiguration("codeMantra");
-	return config.get("enabled", true);
+	const config = vscode.workspace.getConfiguration('codeMantra');
+	return config.get<boolean>('enabled', true);
 }
 
-/**
- * ルール配列を取得する
- * @returns ルール配列
- */
-function getRules(): NotificationRule[] {
-	const config = vscode.workspace.getConfiguration("codeMantra");
-	const rules = config.get("rules", []);
-	console.log("[code-mantra] Retrieved rules:", JSON.stringify(rules));
-	return rules;
-}
+function shouldProcessDocument(document: vscode.TextDocument): boolean {
+	// ファイルタイプチェック
+	const config = vscode.workspace.getConfiguration('codeMantra');
+	const fileTypes = config.get<string[]>('fileTypes', []);
 
-/**
- * ファイルパスがパターンにマッチするかチェックする
- * @param filePath ファイルパス
- * @param pattern ファイルパターン（glob形式）
- * @returns マッチする場合true
- */
-function matchesPattern(filePath: string, pattern: string): boolean {
-	// パターンから拡張子リストを抽出
-	// 例：**/*.{ts,js,tsx,jsx} → ['.ts', '.js', '.tsx', '.jsx']
-	const extMatch = pattern.match(/\{([^}]+)\}/);
-	if (!extMatch) {
+	if (!fileTypes.includes(document.languageId)) {
+		console.log(`[code-mantra] Skipping document with language ID: ${document.languageId}`);
 		return false;
 	}
 
-	const extensions = extMatch[1].split(",").map((ext) => "." + ext.trim());
-	const fileExtension = filePath.substring(filePath.lastIndexOf("."));
+	// 除外パターンチェック
+	const excludePatterns = config.get<string[]>('excludePatterns', []);
+	const filePath = document.uri.fsPath;
 
-	console.log(
-		`[code-mantra] Checking pattern: ${pattern}, file extension: ${fileExtension}`
-	);
+	for (const pattern of excludePatterns) {
+		if (matchesGlobPattern(filePath, pattern)) {
+			console.log(`[code-mantra] Excluding file: ${filePath} (matched pattern: ${pattern})`);
+			return false;
+		}
+	}
 
-	return extensions.includes(fileExtension);
+	return true;
 }
 
-/**
- * 通知メッセージを表示する
- * @param message メッセージ
- */
+function matchesGlobPattern(filePath: string, pattern: string): boolean {
+	// 簡易的なglobパターンマッチング
+	const regexPattern = pattern
+		.replace(/\*\*/g, '.*')
+		.replace(/\*/g, '[^/]*')
+		.replace(/\?/g, '.');
+
+	const regex = new RegExp(regexPattern);
+	return regex.test(filePath);
+}
+
+function getRules(): Array<{ trigger: string, message: string, filePattern: string }> {
+	const config = vscode.workspace.getConfiguration('codeMantra');
+	return config.get<Array<{ trigger: string, message: string, filePattern: string }>>('rules', []);
+}
+
 function showNotification(message: string): void {
+	console.log(`[code-mantra] Displaying notification: ${message}`);
 	vscode.window.showInformationMessage(message);
 }
-
-// This method is called when your extension is deactivated
-export function deactivate() { }
