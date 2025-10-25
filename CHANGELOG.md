@@ -2,6 +2,25 @@
 
 All notable changes to the "code-mantra" extension will be documented in this file.
 
+## [1.0.1] - 2025-01-24
+
+### Added
+
+- Multiple trigger support: onSave, onEdit, onOpen, onFocus
+- TriggerManager class for centralized event management
+- Configuration options for each trigger type (enabled/disabled, delay)
+- Support for 25 programming languages (added: HTML, CSS, SCSS, Sass, Less, Vue, Svelte, Ruby, PHP, Swift, Kotlin, Dart, YAML, JSON)
+- Exclude patterns with glob pattern matching
+- Smart notifications with rate limiting (3 second minimum interval)
+- Comprehensive test suite (9 tests total: 4 TriggerManager tests, 5 extension tests)
+
+### Changed
+
+- Refactored extension.ts to use TriggerManager architecture
+- Updated README.md with comprehensive documentation (Features, Triggers, File Types, Exclude Patterns sections)
+- Configuration now uses nested triggers object instead of flat structure
+- Improved notification logic with debouncing (onEdit) and rate limiting
+
 ## [1.0.0] - 2025-10-26
 
 ### Changed
