@@ -1,71 +1,90 @@
-# code-mantra README
+# Code Mantra
 
-This is the README for your extension "code-mantra". After writing up a brief description, we recommend including the following sections.
+Remind yourself of programming principles with customizable notifications in VS Code.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Code Mantra helps you build better coding habits by showing reminders of programming principles when you save files.
 
-For example if there is an image subfolder under your extension project workspace:
+- 💡 Customizable notification rules
+- 🎯 File pattern matching (TypeScript, JavaScript, Python, etc.)
+- 🔧 Easy configuration via VS Code settings
+- 📚 Built-in presets: Pragmatic Programmer principles (ETC, DRY)
 
-\!\[feature X\]\(images/feature-x.png\)
+## Usage
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### Default Behavior
 
-## Requirements
+When you save a file, Code Mantra will randomly show one of the configured principle reminders:
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- "ETC? (Easier To Change?)" - Is your code easy to change?
+- "DRY? (Don't Repeat Yourself)" - Are you avoiding repetition?
 
-## Extension Settings
+### Configuration
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+Open VS Code settings (`Ctrl+,` or `Cmd+,`) and search for "Code Mantra".
 
-For example:
+#### Enable/Disable
 
-This extension contributes the following settings:
+```json
+{
+  "codeMantra.enabled": true
+}
+```
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+#### Custom Rules
 
-## Known Issues
+Add your own rules in `settings.json`:
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+```json
+{
+  "codeMantra.rules": [
+    {
+      "trigger": "onSave",
+      "message": "ETC? (Easier To Change?)",
+      "filePattern": "**/*.{ts,js,tsx,jsx}"
+    },
+    {
+      "trigger": "onSave",
+      "message": "Single Responsibility?",
+      "filePattern": "**/*.{ts,js}"
+    }
+  ]
+}
+```
 
-## Release Notes
+#### Supported File Patterns
 
-Users appreciate release notes as you update your extension.
+- TypeScript: `**/*.{ts,tsx}`
+- JavaScript: `**/*.{js,jsx}`
+- Python: `**/*.py`
+- Java: `**/*.java`
+- Go: `**/*.go`
+- Rust: `**/*.rs`
+- C/C++: `**/*.{c,cpp}`
+- C#: `**/*.cs`
 
-### 1.0.0
+## Installation
 
-Initial release of ...
+1. Open VS Code
+2. Go to Extensions (`Ctrl+Shift+X` or `Cmd+Shift+X`)
+3. Search for "Code Mantra"
+4. Click Install
 
-### 1.0.1
+## Development
 
-Fixed issue #.
+```bash
+# Install dependencies
+npm install
 
-### 1.1.0
+# Run extension in debug mode
+# Press F5 in VS Code
+```
 
-Added features X, Y, and Z.
+## License
 
----
+MIT
 
-## Following extension guidelines
+## Inspiration
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Inspired by "The Pragmatic Programmer" by David Thomas and Andrew Hunt.
