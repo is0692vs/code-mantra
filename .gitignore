@@ -1,40 +1,31 @@
-# ビルド出力
-out/
-dist/
-*.vsix
-
-# 依存関係
+# Dependencies
 node_modules/
+package-lock.json
+yarn.lock
 
-# テスト関連
-.vscode-test/
-coverage/
-
-# TypeScript
-*.tsbuildinfo
+# Build outputs
+dist/
+out/
+*.js
 *.js.map
-*.ts.map
+*.d.ts
 
-# 環境・設定
-.env
-.env.local
-*.code-workspace
+# VS Code
+.vscode/
+.vscode-test.mjs
 
-# IDE
-.vscode/settings.json
+# IDE and editor
 .idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# ログ
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# その他
 *.swp
 *.swo
 *~
+.DS_Store
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# OS
+Thumbs.db
+.env.local
+.env.*.local
