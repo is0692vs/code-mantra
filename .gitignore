@@ -13,6 +13,7 @@ out/**/*.d.ts
 
 # VS Code
 .vscode/
+.vscode-test*/
 
 
 # IDE and editor
