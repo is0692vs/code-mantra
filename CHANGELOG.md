@@ -2,6 +2,30 @@
 
 All notable changes to the "code-mantra" extension will be documented in this file.
 
+## [1.0.9] - 2025-01-28
+
+### Fixed
+
+- Fixed notification display issues where notifications were not showing up
+- Improved rule filtering to properly handle enabled/disabled states
+- Enhanced file pattern matching for better file targeting
+- Fixed glob pattern matching with proper path normalization
+- Added comprehensive debugging logs for troubleshooting
+
+### Changed
+
+- Simplified default rules to only include "ETC? (Easier To Change?)" message
+- Made file pattern specification optional for all triggers (defaults to all files when not specified)
+- Reduced notification throttle interval from 3 seconds to 1 second for better responsiveness
+- Updated trigger dialog to use optional file patterns with clearer UI
+
+### Added
+
+- Test notification command for debugging purposes
+- Enhanced logging throughout the extension for better problem diagnosis
+- Better error handling for notification display
+- Debug settings and launch configuration for development
+
 ## [Unreleased]
 
 ### Added

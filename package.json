@@ -3,7 +3,7 @@
   "publisher": "hirokimukai",
   "displayName": "Code Mantra",
   "description": "Remind yourself of programming principles with customizable notifications",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "icon": "icon.png",
   "galleryBanner": {
     "color": "#1e1e1e",
@@ -63,6 +63,11 @@
       {
         "command": "code-mantra.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "code-mantra.testNotification",
+        "title": "Test Notification",
+        "icon": "$(bell)"
       },
       {
         "command": "code-mantra.addTrigger",
@@ -230,13 +235,7 @@
           "default": [
             {
               "trigger": "onSave",
-              "message": "ETC? (Easier To Change?)",
-              "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs,md,mdx}"
-            },
-            {
-              "trigger": "onSave",
-              "message": "DRY? (Don't Repeat Yourself)",
-              "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs,md,mdx}"
+              "message": "ETC? (Easier To Change?)"
             }
           ],
           "description": "Custom notification rules with trigger, message, and file pattern",
@@ -263,8 +262,7 @@
               },
               "filePattern": {
                 "type": "string",
-                "default": "**/*.*",
-                "description": "Glob pattern for file matching (e.g., **/*.ts)"
+                "description": "Glob pattern for file matching (optional, defaults to all files)"
               },
               "enabled": {
                 "type": "boolean",

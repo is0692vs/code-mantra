@@ -37,14 +37,14 @@ export class TriggerDialog {
         // ファイルパターンを入力
         const filePattern = await vscode.window.showInputBox({
             prompt: 'ファイルパターンを入力してください (オプション)',
-            placeHolder: '例: **/*.{ts,js,tsx,jsx} または 空白で全てのファイル',
-            value: '**/*.*'
+            placeHolder: '例: **/*.{ts,js,tsx,jsx} または 空白で全てのファイル対象',
+            value: ''
         });
 
         return {
             trigger: triggerType.value,
             message: message.trim(),
-            filePattern: filePattern?.trim() || '**/*.*',
+            filePattern: filePattern?.trim() || undefined,
             enabled: true
         };
     }
@@ -88,15 +88,15 @@ export class TriggerDialog {
 
         // ファイルパターンを編集
         const filePattern = await vscode.window.showInputBox({
-            prompt: 'ファイルパターンを編集してください',
-            placeHolder: '例: **/*.{ts,js,tsx,jsx}',
-            value: existingRule.filePattern || '**/*.*'
+            prompt: 'ファイルパターンを編集してください (オプション)',
+            placeHolder: '例: **/*.{ts,js,tsx,jsx} または 空白で全てのファイル対象',
+            value: existingRule.filePattern || ''
         });
 
         return {
             trigger: triggerType.value,
             message: message.trim(),
-            filePattern: filePattern?.trim() || '**/*.*',
+            filePattern: filePattern?.trim() || undefined,
             enabled: existingRule.enabled
         };
     }
