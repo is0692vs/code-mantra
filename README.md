@@ -77,10 +77,12 @@ Configure when notifications should appear:
 
 **Available Triggers:**
 
-- `onSave`: Show notification when saving files (default: enabled)
-- `onEdit`: Show notification while editing after a delay (default: disabled, 5 seconds delay)
-- `onOpen`: Show notification when opening files (default: disabled)
-- `onFocus`: Show notification when editor gains focus (default: disabled)
+| Trigger   | When it fires                 | Recommended use                                               |
+| --------- | ----------------------------- | ------------------------------------------------------------- |
+| `onSave`  | After saving a file           | Best default option before committing changes.                |
+| `onEdit`  | While editing (after a delay) | Gentle nudges without interrupting flow thanks to debouncing. |
+| `onOpen`  | As soon as a file opens       | Kick off work with a reminder when you start editing.         |
+| `onFocus` | When the editor gains focus   | Helpful when switching between files or windows.              |
 
 ### File Types
 
@@ -94,13 +96,20 @@ Specify which programming languages to show notifications for:
     "python",
     "java",
     "go",
-    "rust"
+    "rust",
+    "markdown"
   ]
 }
 ```
 
 **Supported Language IDs:**
-TypeScript, JavaScript, Python, Java, Go, Rust, C, C++, C#, HTML, CSS, SCSS, Vue, Ruby, PHP, Swift, Kotlin, Dart, YAML, JSON
+
+- Web: `typescript`, `javascript`, `html`, `css`, `scss`, `vue`, `svelte`
+- Systems: `rust`, `go`, `c`, `cpp`, `csharp`
+- Mobile: `swift`, `kotlin`, `dart`
+- General: `python`, `java`, `ruby`, `php`
+- Data: `yaml`, `json`
+- Docs: `markdown`, `mdx`
 
 ### Exclude Patterns
 
@@ -137,6 +146,12 @@ Add your own rules in `settings.json`:
   ]
 }
 ```
+
+| Property      | Purpose                                                 | Notes                                                    |
+| ------------- | ------------------------------------------------------- | -------------------------------------------------------- |
+| `trigger`     | Matches one of `onSave`, `onEdit`, `onOpen`, `onFocus`. | Aligns with the triggers table above.                    |
+| `message`     | Text shown in the notification toast.                   | Keep it short and actionable.                            |
+| `filePattern` | Optional glob to scope the rule.                        | Example: `**/*.md` (defaults to all files when omitted). |
 
 ## Installation
 
