@@ -83,7 +83,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
     readonly onDidChangeTreeData: vscode.Event<TriggerTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
     constructor(private context: vscode.ExtensionContext) {
-        // 設定変更時にTreeViewを更新
+        // Refresh TreeView when configuration changes
         vscode.workspace.onDidChangeConfiguration((event) => {
             if (event.affectsConfiguration('codeMantra.rules') ||
                 event.affectsConfiguration('codeMantra.triggers')) {
@@ -112,6 +112,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
             return [];
         }
 
+        // Show all triggers regardless of enabled state (checkbox controls visibility of state)
         return rules.map((rule, index) =>
             new TriggerTreeItem(rule, index, vscode.TreeItemCollapsibleState.None)
         );
