@@ -3,8 +3,8 @@
   "publisher": "hirokimukai",
   "displayName": "Code Mantra",
   "description": "Remind yourself of programming principles with customizable notifications",
-  "version": "1.0.3",
-  "icon": "images/icon.png",
+  "version": "1.0.4",
+  "icon": "icon.png",
   "galleryBanner": {
     "color": "#1e1e1e",
     "theme": "dark"

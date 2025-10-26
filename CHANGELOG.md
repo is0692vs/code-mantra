@@ -2,13 +2,21 @@
 
 All notable changes to the "code-mantra" extension will be documented in this file.
 
+## [1.0.4] - 2025-10-26
+
+### Fixed
+
+- Moved extension icon to repository root and updated manifest so VS Code Marketplace correctly displays the image
+
 ## [1.0.3] - 2025-10-26
 
 ### Fixed
+
 - Fixed icon image display in VS Code Marketplace (updated .vscodeignore to ensure icon is packaged)
 - Ensured all necessary files are included in the marketplace package
 
 ### Improved
+
 - Better packaging configuration for release
 
 ## [1.0.1] - 2025-01-24
