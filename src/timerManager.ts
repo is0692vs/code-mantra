@@ -5,6 +5,7 @@ export interface TimeBasedNotification {
     message: string;
     type: string;
     enabled: boolean;
+    id?: string; // Optional unique identifier for timer instances
 }
 
 interface TimerState {
@@ -37,31 +38,34 @@ export class TimerManager {
             return;
         }
 
+        // Use id if provided, otherwise fall back to type
+        const timerId = notification.id || notification.type;
+
         // 既存のタイマーがあれば停止
-        this.stopTimer(notification.type);
+        this.stopTimer(timerId);
 
         const durationMs = notification.duration * 60 * 1000;
         const startTime = Date.now();
 
-        console.log(`[code-mantra] Starting timer: ${notification.type} (${notification.duration} minutes)`);
+        console.log(`[code-mantra] Starting timer: ${timerId} (${notification.duration} minutes)`);
 
         const timeoutId = setTimeout(() => {
             if (!this.disposed) {
                 try {
-                    console.log(`[code-mantra] Timer fired: ${notification.type}`);
+                    console.log(`[code-mantra] Timer fired: ${timerId}`);
                     callback();
 
                     // タイマーを再設定（繰り返し動作）
-                    if (this.timers.has(notification.type)) {
+                    if (this.timers.has(timerId)) {
                         this.startTimer(notification, callback);
                     }
                 } catch (error) {
-                    console.error(`[code-mantra] Error in timer callback for ${notification.type}:`, error);
+                    console.error(`[code-mantra] Error in timer callback for ${timerId}:`, error);
                 }
             }
         }, durationMs);
 
-        this.timers.set(notification.type, {
+        this.timers.set(timerId, {
             timeout: timeoutId,
             startTime,
             notification

@@ -197,6 +197,7 @@ function initializeTimers(): void {
 	const timeBasedEnabled = config.get<boolean>('timeBasedNotifications.enabled', true);
 
 	// Clear all existing timers first
+	timerManager?.clearAllTimers();
 
 	// Process rules array for onTimer triggers
 	const rules = config.get<Array<{
@@ -210,12 +211,15 @@ function initializeTimers(): void {
 	const timerRules = rules.filter(rule => rule.trigger === 'onTimer' && rule.enabled !== false);
 	console.log(`[code-mantra] Starting ${timerRules.length} timer rules from rules array`);
 
-	timerRules.forEach(rule => {
+	timerRules.forEach((rule, index) => {
+		// Generate guaranteed unique ID using index
+		const uniqueId = `timer-rule-${index}`;
 		const notification: TimeBasedNotification = {
 			duration: rule.duration || 25,
 			message: rule.message,
 			type: rule.timerType || 'custom',
-			enabled: true
+			enabled: true,
+			id: uniqueId
 		};
 		timerManager?.startTimer(notification, () => {
 			showNotification(notification.message);
