@@ -3,7 +3,7 @@
   "publisher": "hirokimukai",
   "displayName": "Code Mantra",
   "description": "Remind yourself of programming principles with customizable notifications",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "icon": "icon.png",
   "galleryBanner": {
     "color": "#1e1e1e",
@@ -145,12 +145,14 @@
             "kotlin",
             "dart",
             "yaml",
-            "json"
+            "json",
+            "markdown",
+            "mdx"
           ],
           "items": {
             "type": "string"
           },
-          "markdownDescription": "List of language IDs to show notifications for.\n\n---\n\n**Supported Languages:**\n- Web: `typescript`, `javascript`, `html`, `css`, `scss`, `vue`, `svelte`\n- Systems: `rust`, `go`, `c`, `cpp`, `csharp`\n- Mobile: `swift`, `kotlin`, `dart`\n- General: `python`, `java`, `ruby`, `php`\n- Data: `yaml`, `json`\n\n**Tip:** You can add or remove languages from this list using the UI.",
+          "markdownDescription": "List of language IDs to show notifications for.\n\n---\n\n**Supported Languages:**\n- Web: `typescript`, `javascript`, `html`, `css`, `scss`, `vue`, `svelte`\n- Systems: `rust`, `go`, `c`, `cpp`, `csharp`\n- Mobile: `swift`, `kotlin`, `dart`\n- General: `python`, `java`, `ruby`, `php`\n- Data: `yaml`, `json`\n- Docs: `markdown`, `mdx`\n\n**Tip:** You can add or remove languages from this list using the UI.",
           "editPresentation": "multilineText"
         },
         "codeMantra.excludePatterns": {
@@ -173,15 +175,43 @@
             {
               "trigger": "onSave",
               "message": "ETC? (Easier To Change?)",
-              "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs}"
+              "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs,md,mdx}"
             },
             {
               "trigger": "onSave",
               "message": "DRY? (Don't Repeat Yourself)",
-              "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs}"
+              "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs,md,mdx}"
             }
           ],
-          "description": "List of notification rules"
+          "markdownDescription": "Custom notification rules per trigger.\n\n| Trigger | Default | Description |\n| --- | --- | --- |\n| `onSave` | Enabled | Run after saving files (recommended). |\n| `onEdit` | Optional | Run while editing with a delay. |\n| `onOpen` | Optional | Run immediately when opening a file. |\n| `onFocus` | Optional | Run when the editor gains focus. |\n\n**Tip:** Use the table above to quickly map triggers to the messages you configure.",
+          "items": {
+            "type": "object",
+            "required": [
+              "trigger",
+              "message"
+            ],
+            "properties": {
+              "trigger": {
+                "type": "string",
+                "enum": [
+                  "onSave",
+                  "onEdit",
+                  "onOpen",
+                  "onFocus"
+                ],
+                "markdownDescription": "Trigger that runs the notification. Matches the options configured in `codeMantra.triggers`."
+              },
+              "message": {
+                "type": "string",
+                "markdownDescription": "The notification text to display. Keep it short so it fits in the toast."
+              },
+              "filePattern": {
+                "type": "string",
+                "default": "**/*.*",
+                "markdownDescription": "Glob pattern that limits the rule to specific files (for example `**/*.md`). Leave blank to apply to all files."
+              }
+            }
+          }
         }
       }
     }
