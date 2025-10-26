@@ -212,6 +212,90 @@
               }
             }
           }
+        },
+        "codeMantra.timeBasedNotifications": {
+          "type": "object",
+          "markdownDescription": "⏰ **Time-Based Notifications** - Show notifications at regular intervals.\n\n---\n\n**Timer Types:**\n\n| Type | Duration | Use Case |\n| --- | --- | --- |\n| `workBreak` | 50 min | Remind to take breaks during long work sessions. |\n| `pomodoro` | 25 min | Classic Pomodoro Technique timer. |\n| `custom` | Any | Define your own custom interval. |\n\n**Tip:** Enable `resetOn: [\"save\"]` to restart timers when you save files, keeping you in flow.",
+          "default": {
+            "enabled": true,
+            "intervals": [
+              {
+                "duration": 50,
+                "message": "💡 Time to take a break! Step away from your screen.",
+                "type": "workBreak",
+                "enabled": true
+              },
+              {
+                "duration": 25,
+                "message": "🍅 Pomodoro complete! Take a short break.",
+                "type": "pomodoro",
+                "enabled": false
+              }
+            ],
+            "resetOn": [
+              "save"
+            ]
+          },
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "markdownDescription": "Enable or disable all time-based notifications.\n\n**Note:** Individual timers can still be disabled in the intervals table below."
+            },
+            "intervals": {
+              "type": "array",
+              "markdownDescription": "Configure multiple timer intervals. Each timer runs independently and can be reset by events.\n\n**Table Columns:**\n- **duration**: Minutes until notification (1-120)\n- **message**: Text to display in notification\n- **type**: Timer type (`workBreak`, `pomodoro`, or `custom`)\n- **enabled**: Enable/disable this specific timer",
+              "items": {
+                "type": "object",
+                "required": [
+                  "duration",
+                  "message",
+                  "type",
+                  "enabled"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "duration": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 120,
+                    "markdownDescription": "Duration in minutes before showing notification.\n\n**Range:** 1-120 minutes"
+                  },
+                  "message": {
+                    "type": "string",
+                    "markdownDescription": "The notification text to display. Use emojis to make it more engaging!"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "workBreak",
+                      "pomodoro",
+                      "custom"
+                    ],
+                    "markdownDescription": "Timer type:\n- `workBreak`: Standard work break timer\n- `pomodoro`: Pomodoro Technique timer\n- `custom`: Your custom timer"
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "markdownDescription": "Enable or disable this timer."
+                  }
+                }
+              }
+            },
+            "resetOn": {
+              "type": "array",
+              "default": [
+                "save"
+              ],
+              "markdownDescription": "Reset all timers when specific events occur.\n\n**Events:**\n- `save`: Reset timers when you save a file (keeps you in flow)\n- `focus`: Reset timers when you switch editor focus\n\n**Tip:** Use `save` to avoid interruptions during deep work sessions.",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "save",
+                  "focus"
+                ]
+              }
+            }
+          }
         }
       }
     }
