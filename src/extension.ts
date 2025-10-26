@@ -139,6 +139,9 @@ export function activate(context: vscode.ExtensionContext) {
 				triggerManager?.deactivate();
 				triggerManager = new TriggerManager(context, handleTrigger);
 				triggerManager.activate();
+
+				// Reinitialize timers when rules change (may include onTimer rules)
+				reinitializeTimers();
 			}
 
 			if (event.affectsConfiguration('codeMantra.timeBasedNotifications')) {
@@ -193,6 +196,34 @@ function initializeTimers(): void {
 	const config = vscode.workspace.getConfiguration('codeMantra');
 	const timeBasedEnabled = config.get<boolean>('timeBasedNotifications.enabled', true);
 
+	// Clear all existing timers first
+	timerManager?.clearAllTimers();
+
+	// Process rules array for onTimer triggers
+	const rules = config.get<Array<{
+		trigger: string;
+		message: string;
+		duration?: number;
+		timerType?: string;
+		enabled?: boolean;
+	}>>('rules', []);
+
+	const timerRules = rules.filter(rule => rule.trigger === 'onTimer' && rule.enabled !== false);
+	console.log(`[code-mantra] Starting ${timerRules.length} timer rules from rules array`);
+
+	timerRules.forEach(rule => {
+		const notification: TimeBasedNotification = {
+			duration: rule.duration || 25,
+			message: rule.message,
+			type: rule.timerType || 'custom',
+			enabled: true
+		};
+		timerManager?.startTimer(notification, () => {
+			showNotification(notification.message);
+		});
+	});
+
+	// Also process old-style timeBasedNotifications config (for backward compatibility)
 	if (!timeBasedEnabled) {
 		console.log('[code-mantra] Time-based notifications are disabled');
 		return;
@@ -206,7 +237,7 @@ function initializeTimers(): void {
 
 	// 有効なタイマーのみを起動
 	const enabledIntervals = intervals.filter(interval => interval.enabled);
-	console.log(`[code-mantra] Starting ${enabledIntervals.length} time-based timers`);
+	console.log(`[code-mantra] Starting ${enabledIntervals.length} time-based timers from legacy config`);
 
 	enabledIntervals.forEach(interval => {
 		timerManager?.startTimer(interval, () => {
@@ -237,7 +268,10 @@ function handleTrigger(document: vscode.TextDocument): void {
 	const rules = getRules();
 	console.log(`[code-mantra] Found ${rules.length} rules:`, rules);
 
-	const matchingRules = rules.filter(rule => {
+	// Filter out onTimer rules (they are handled separately by TimerManager)
+	const fileBasedRules = rules.filter(rule => rule.trigger !== 'onTimer');
+
+	const matchingRules = fileBasedRules.filter(rule => {
 		// 有効性チェック
 		if (rule.enabled === false) {
 			return false;
