@@ -19,10 +19,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// 設定変更時に再初期化
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {
-			if (event.affectsConfiguration('codeMantra.triggers') || 
-			    event.affectsConfiguration('codeMantra.fileTypes') ||
-			    event.affectsConfiguration('codeMantra.excludePatterns') ||
-			    event.affectsConfiguration('codeMantra.rules')) {
+			if (event.affectsConfiguration('codeMantra.triggers') ||
+				event.affectsConfiguration('codeMantra.fileTypes') ||
+				event.affectsConfiguration('codeMantra.excludePatterns') ||
+				event.affectsConfiguration('codeMantra.rules')) {
 				console.log('[code-mantra] Trigger configuration changed, reactivating');
 				triggerManager?.deactivate();
 				triggerManager = new TriggerManager(context, handleTrigger);
@@ -39,10 +39,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// タイマーリセットイベントの登録
 	const config = vscode.workspace.getConfiguration('codeMantra');
 	const timeBasedConfig = config.get<any>('timeBasedNotifications');
-	
+
 	if (timeBasedConfig?.enabled && timeBasedConfig?.resetOn) {
 		const resetEvents = timeBasedConfig.resetOn as string[];
-		
+
 		if (resetEvents.includes('save')) {
 			context.subscriptions.push(
 				vscode.workspace.onDidSaveTextDocument(() => {
