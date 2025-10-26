@@ -14,3 +14,10 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+
+# Keep these files for marketplace:
+# - images/** (icon.png will be included)
+# - README.md (included by default)
+# - README.ja.md (included)
+# - dist/** (compiled extension)
+# - CHANGELOG.md (version history)
