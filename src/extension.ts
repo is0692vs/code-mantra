@@ -212,13 +212,14 @@ function initializeTimers(): void {
 	console.log(`[code-mantra] Starting ${timerRules.length} timer rules from rules array`);
 
 	timerRules.forEach((rule, index) => {
-		// Use unique identifier for each timer (based on index + message hash)
-		const uniqueId = `timer-${index}-${rule.message.substring(0, 20).replace(/\s/g, '_')}`;
+		// Generate guaranteed unique ID using index
+		const uniqueId = `timer-rule-${index}`;
 		const notification: TimeBasedNotification = {
 			duration: rule.duration || 25,
 			message: rule.message,
-			type: uniqueId,
-			enabled: true
+			type: rule.timerType || 'custom',
+			enabled: true,
+			id: uniqueId
 		};
 		timerManager?.startTimer(notification, () => {
 			showNotification(notification.message);
