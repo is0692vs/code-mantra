@@ -52,7 +52,7 @@
         "codeMantra.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Enable or disable Code Mantra notifications"
+          "markdownDescription": "Enable or disable Code Mantra notifications.\n\n---\n\nWhen enabled, Code Mantra will show programming principle reminders based on your configured triggers."
         },
         "codeMantra.triggers": {
           "type": "object",
@@ -71,14 +71,14 @@
               "enabled": false
             }
           },
-          "description": "Configure notification triggers",
+          "markdownDescription": "Configure when notifications should appear.\n\n---\n\n**Available Triggers:**\n- `onSave`: When saving files (recommended)\n- `onEdit`: While editing with delay\n- `onOpen`: When opening files\n- `onFocus`: When editor gains focus",
           "properties": {
             "onSave": {
               "type": "object",
               "properties": {
                 "enabled": {
                   "type": "boolean",
-                  "description": "Show notifications when saving files"
+                  "markdownDescription": "✅ **Recommended** - Show notifications when saving files.\n\nThis is the most common trigger and works well for most users."
                 }
               }
             },
@@ -87,13 +87,14 @@
               "properties": {
                 "enabled": {
                   "type": "boolean",
-                  "description": "Show notifications while editing (with delay)"
+                  "markdownDescription": "⏱️ Show notifications while editing (with delay).\n\n**Note:** Uses debouncing to avoid interruptions. Customize the delay below."
                 },
                 "delay": {
                   "type": "number",
-                  "description": "Delay in milliseconds before showing notification",
+                  "markdownDescription": "Delay in milliseconds before showing notification.\n\n**Recommended:** 3000-5000ms\n**Minimum:** 1000ms",
                   "default": 5000,
-                  "minimum": 1000
+                  "minimum": 1000,
+                  "maximum": 10000
                 }
               }
             },
@@ -102,7 +103,7 @@
               "properties": {
                 "enabled": {
                   "type": "boolean",
-                  "description": "Show notifications when opening files"
+                  "markdownDescription": "📂 Show notifications when opening files.\n\n**Use case:** Get reminders when starting to work on a file."
                 }
               }
             },
@@ -111,7 +112,7 @@
               "properties": {
                 "enabled": {
                   "type": "boolean",
-                  "description": "Show notifications when editor gains focus"
+                  "markdownDescription": "🎯 Show notifications when editor gains focus.\n\n**Use case:** Get reminders when switching between files or windows."
                 }
               }
             }
@@ -149,7 +150,8 @@
           "items": {
             "type": "string"
           },
-          "description": "List of language IDs to show notifications for"
+          "markdownDescription": "List of language IDs to show notifications for.\n\n---\n\n**Supported Languages:**\n- Web: `typescript`, `javascript`, `html`, `css`, `scss`, `vue`, `svelte`\n- Systems: `rust`, `go`, `c`, `cpp`, `csharp`\n- Mobile: `swift`, `kotlin`, `dart`\n- General: `python`, `java`, `ruby`, `php`\n- Data: `yaml`, `json`\n\n**Tip:** You can add or remove languages from this list using the UI.",
+          "editPresentation": "multilineText"
         },
         "codeMantra.excludePatterns": {
           "type": "array",
@@ -162,7 +164,8 @@
           "items": {
             "type": "string"
           },
-          "description": "Glob patterns to exclude from notifications"
+          "markdownDescription": "Glob patterns to exclude files/directories from notifications.\n\n---\n\n**Examples:**\n- `**/node_modules/**` - Exclude node_modules\n- `**/dist/**` - Exclude build output\n- `**/*.test.ts` - Exclude test files\n- `**/vendor/**` - Exclude vendor directory\n\n**Glob Patterns:**\n- `**` matches any number of directories\n- `*` matches any characters except `/`",
+          "editPresentation": "multilineText"
         },
         "codeMantra.rules": {
           "type": "array",
