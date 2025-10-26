@@ -38,12 +38,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// タイマーリセットイベントの登録
 	const config = vscode.workspace.getConfiguration('codeMantra');
-	const timeBasedConfig = config.get<any>('timeBasedNotifications');
+	const timeBasedEnabled = config.get<boolean>('timeBasedNotifications.enabled', true);
+	const resetOn = config.get<string[]>('timeBasedNotifications.resetOn', ['save']);
 
-	if (timeBasedConfig?.enabled && timeBasedConfig?.resetOn) {
-		const resetEvents = timeBasedConfig.resetOn as string[];
-
-		if (resetEvents.includes('save')) {
+	if (timeBasedEnabled && resetOn) {
+		if (resetOn.includes('save')) {
 			context.subscriptions.push(
 				vscode.workspace.onDidSaveTextDocument(() => {
 					console.log('[code-mantra] File saved, resetting timers');
@@ -52,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 			);
 		}
 
-		if (resetEvents.includes('focus')) {
+		if (resetOn.includes('focus')) {
 			context.subscriptions.push(
 				vscode.window.onDidChangeWindowState((state) => {
 					if (state.focused) {
@@ -78,14 +77,14 @@ export function deactivate() {
 
 function initializeTimers(): void {
 	const config = vscode.workspace.getConfiguration('codeMantra');
-	const timeBasedConfig = config.get<any>('timeBasedNotifications');
+	const timeBasedEnabled = config.get<boolean>('timeBasedNotifications.enabled', true);
 
-	if (!timeBasedConfig?.enabled) {
+	if (!timeBasedEnabled) {
 		console.log('[code-mantra] Time-based notifications are disabled');
 		return;
 	}
 
-	const intervals = timeBasedConfig.intervals as TimeBasedNotification[];
+	const intervals = config.get<TimeBasedNotification[]>('timeBasedNotifications.intervals', []);
 	if (!intervals || intervals.length === 0) {
 		console.log('[code-mantra] No time-based notification intervals configured');
 		return;

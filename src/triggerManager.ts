@@ -54,12 +54,23 @@ export class TriggerManager {
 
     private getTriggersConfig(): TriggersConfig {
         const config = vscode.workspace.getConfiguration('codeMantra');
-        return config.get<TriggersConfig>('triggers', {
-            onSave: { enabled: true },
-            onEdit: { enabled: false, delay: 5000 },
-            onOpen: { enabled: false },
-            onFocus: { enabled: false }
-        });
+        
+        // 新しいフラットな設定構造から読み取り
+        return {
+            onSave: { 
+                enabled: config.get<boolean>('triggers.onSave.enabled', true) 
+            },
+            onEdit: { 
+                enabled: config.get<boolean>('triggers.onEdit.enabled', false),
+                delay: config.get<number>('triggers.onEdit.delay', 5000)
+            },
+            onOpen: { 
+                enabled: config.get<boolean>('triggers.onOpen.enabled', false) 
+            },
+            onFocus: { 
+                enabled: config.get<boolean>('triggers.onFocus.enabled', false) 
+            }
+        };
     }
 
     private shouldShowNotification(): boolean {

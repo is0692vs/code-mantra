@@ -52,71 +52,34 @@
         "codeMantra.enabled": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Enable or disable Code Mantra notifications.\n\n---\n\nWhen enabled, Code Mantra will show programming principle reminders based on your configured triggers."
+          "description": "Enable or disable Code Mantra notifications"
         },
-        "codeMantra.triggers": {
-          "type": "object",
-          "default": {
-            "onSave": {
-              "enabled": true
-            },
-            "onEdit": {
-              "enabled": false,
-              "delay": 5000
-            },
-            "onOpen": {
-              "enabled": false
-            },
-            "onFocus": {
-              "enabled": false
-            }
-          },
-          "markdownDescription": "Configure when notifications should appear.\n\n---\n\n**Available Triggers:**\n- `onSave`: When saving files (recommended)\n- `onEdit`: While editing with delay\n- `onOpen`: When opening files\n- `onFocus`: When editor gains focus",
-          "properties": {
-            "onSave": {
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "type": "boolean",
-                  "markdownDescription": "✅ **Recommended** - Show notifications when saving files.\n\nThis is the most common trigger and works well for most users."
-                }
-              }
-            },
-            "onEdit": {
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "type": "boolean",
-                  "markdownDescription": "⏱️ Show notifications while editing (with delay).\n\n**Note:** Uses debouncing to avoid interruptions. Customize the delay below."
-                },
-                "delay": {
-                  "type": "number",
-                  "markdownDescription": "Delay in milliseconds before showing notification.\n\n**Recommended:** 3000-5000ms\n**Minimum:** 1000ms",
-                  "default": 5000,
-                  "minimum": 1000,
-                  "maximum": 10000
-                }
-              }
-            },
-            "onOpen": {
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "type": "boolean",
-                  "markdownDescription": "📂 Show notifications when opening files.\n\n**Use case:** Get reminders when starting to work on a file."
-                }
-              }
-            },
-            "onFocus": {
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "type": "boolean",
-                  "markdownDescription": "🎯 Show notifications when editor gains focus.\n\n**Use case:** Get reminders when switching between files or windows."
-                }
-              }
-            }
-          }
+        "codeMantra.triggers.onSave.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "✅ Show notifications when saving files (recommended)"
+        },
+        "codeMantra.triggers.onEdit.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "⏱️ Show notifications while editing (with delay)"
+        },
+        "codeMantra.triggers.onEdit.delay": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 1000,
+          "maximum": 10000,
+          "description": "Delay in milliseconds before showing notification (1000-10000ms)"
+        },
+        "codeMantra.triggers.onOpen.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "📂 Show notifications when opening files"
+        },
+        "codeMantra.triggers.onFocus.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "🎯 Show notifications when editor gains focus"
         },
         "codeMantra.fileTypes": {
           "type": "array",
@@ -152,8 +115,7 @@
           "items": {
             "type": "string"
           },
-          "markdownDescription": "List of language IDs to show notifications for.\n\n---\n\n**Supported Languages:**\n- Web: `typescript`, `javascript`, `html`, `css`, `scss`, `vue`, `svelte`\n- Systems: `rust`, `go`, `c`, `cpp`, `csharp`\n- Mobile: `swift`, `kotlin`, `dart`\n- General: `python`, `java`, `ruby`, `php`\n- Data: `yaml`, `json`\n- Docs: `markdown`, `mdx`\n\n**Tip:** You can add or remove languages from this list using the UI.",
-          "editPresentation": "multilineText"
+          "description": "List of language IDs to show notifications for. Add or remove languages as needed."
         },
         "codeMantra.excludePatterns": {
           "type": "array",
@@ -166,8 +128,7 @@
           "items": {
             "type": "string"
           },
-          "markdownDescription": "Glob patterns to exclude files/directories from notifications.\n\n---\n\n**Examples:**\n- `**/node_modules/**` - Exclude node_modules\n- `**/dist/**` - Exclude build output\n- `**/*.test.ts` - Exclude test files\n- `**/vendor/**` - Exclude vendor directory\n\n**Glob Patterns:**\n- `**` matches any number of directories\n- `*` matches any characters except `/`",
-          "editPresentation": "multilineText"
+          "description": "Glob patterns to exclude files/directories from notifications (e.g., **/node_modules/**, **/*.test.ts)"
         },
         "codeMantra.rules": {
           "type": "array",
@@ -183,7 +144,7 @@
               "filePattern": "**/*.{ts,js,tsx,jsx,py,java,go,rs,cpp,c,cs,md,mdx}"
             }
           ],
-          "markdownDescription": "Custom notification rules per trigger.\n\n| Trigger | Default | Description |\n| --- | --- | --- |\n| `onSave` | Enabled | Run after saving files (recommended). |\n| `onEdit` | Optional | Run while editing with a delay. |\n| `onOpen` | Optional | Run immediately when opening a file. |\n| `onFocus` | Optional | Run when the editor gains focus. |\n\n**Tip:** Use the table above to quickly map triggers to the messages you configure.",
+          "description": "Custom notification rules with trigger, message, and file pattern",
           "items": {
             "type": "object",
             "required": [
@@ -199,102 +160,89 @@
                   "onOpen",
                   "onFocus"
                 ],
-                "markdownDescription": "Trigger that runs the notification. Matches the options configured in `codeMantra.triggers`."
+                "description": "When to trigger the notification"
               },
               "message": {
                 "type": "string",
-                "markdownDescription": "The notification text to display. Keep it short so it fits in the toast."
+                "description": "The notification text to display"
               },
               "filePattern": {
                 "type": "string",
                 "default": "**/*.*",
-                "markdownDescription": "Glob pattern that limits the rule to specific files (for example `**/*.md`). Leave blank to apply to all files."
+                "description": "Glob pattern for file matching (e.g., **/*.ts)"
               }
             }
           }
         },
-        "codeMantra.timeBasedNotifications": {
-          "type": "object",
-          "markdownDescription": "⏰ **Time-Based Notifications** - Show notifications at regular intervals.\n\n---\n\n**Timer Types:**\n\n| Type | Duration | Use Case |\n| --- | --- | --- |\n| `workBreak` | 50 min | Remind to take breaks during long work sessions. |\n| `pomodoro` | 25 min | Classic Pomodoro Technique timer. |\n| `custom` | Any | Define your own custom interval. |\n\n**Tip:** Enable `resetOn: [\"save\"]` to restart timers when you save files, keeping you in flow.",
-          "default": {
-            "enabled": true,
-            "intervals": [
-              {
-                "duration": 50,
-                "message": "💡 Time to take a break! Step away from your screen.",
-                "type": "workBreak",
-                "enabled": true
-              },
-              {
-                "duration": 25,
-                "message": "🍅 Pomodoro complete! Take a short break.",
-                "type": "pomodoro",
-                "enabled": false
-              }
+        "codeMantra.timeBasedNotifications.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "⏰ Enable time-based notifications at regular intervals"
+        },
+        "codeMantra.timeBasedNotifications.intervals": {
+          "type": "array",
+          "default": [
+            {
+              "duration": 50,
+              "message": "💡 Time to take a break! Step away from your screen.",
+              "type": "workBreak",
+              "enabled": true
+            },
+            {
+              "duration": 25,
+              "message": "🍅 Pomodoro complete! Take a short break.",
+              "type": "pomodoro",
+              "enabled": false
+            }
+          ],
+          "description": "Configure timer intervals (duration in minutes, message, type, and enabled status)",
+          "items": {
+            "type": "object",
+            "required": [
+              "duration",
+              "message",
+              "type",
+              "enabled"
             ],
-            "resetOn": [
-              "save"
-            ]
-          },
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "markdownDescription": "Enable or disable all time-based notifications.\n\n**Note:** Individual timers can still be disabled in the intervals table below."
-            },
-            "intervals": {
-              "type": "array",
-              "markdownDescription": "Configure multiple timer intervals. Each timer runs independently and can be reset by events.\n\n**Table Columns:**\n- **duration**: Minutes until notification (1-120)\n- **message**: Text to display in notification\n- **type**: Timer type (`workBreak`, `pomodoro`, or `custom`)\n- **enabled**: Enable/disable this specific timer",
-              "items": {
-                "type": "object",
-                "required": [
-                  "duration",
-                  "message",
-                  "type",
-                  "enabled"
-                ],
-                "additionalProperties": false,
-                "properties": {
-                  "duration": {
-                    "type": "number",
-                    "minimum": 1,
-                    "maximum": 120,
-                    "markdownDescription": "Duration in minutes before showing notification.\n\n**Range:** 1-120 minutes"
-                  },
-                  "message": {
-                    "type": "string",
-                    "markdownDescription": "The notification text to display. Use emojis to make it more engaging!"
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "workBreak",
-                      "pomodoro",
-                      "custom"
-                    ],
-                    "markdownDescription": "Timer type:\n- `workBreak`: Standard work break timer\n- `pomodoro`: Pomodoro Technique timer\n- `custom`: Your custom timer"
-                  },
-                  "enabled": {
-                    "type": "boolean",
-                    "markdownDescription": "Enable or disable this timer."
-                  }
-                }
-              }
-            },
-            "resetOn": {
-              "type": "array",
-              "default": [
-                "save"
-              ],
-              "markdownDescription": "Reset all timers when specific events occur.\n\n**Events:**\n- `save`: Reset timers when you save a file (keeps you in flow)\n- `focus`: Reset timers when you switch editor focus\n\n**Tip:** Use `save` to avoid interruptions during deep work sessions.",
-              "items": {
+            "properties": {
+              "duration": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 120,
+                "description": "Duration in minutes (1-120)"
+              },
+              "message": {
+                "type": "string",
+                "description": "Notification message to display"
+              },
+              "type": {
                 "type": "string",
                 "enum": [
-                  "save",
-                  "focus"
-                ]
+                  "workBreak",
+                  "pomodoro",
+                  "custom"
+                ],
+                "description": "Timer type"
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable or disable this timer"
               }
             }
+          }
+        },
+        "codeMantra.timeBasedNotifications.resetOn": {
+          "type": "array",
+          "default": [
+            "save"
+          ],
+          "description": "Reset timers on specific events (save, focus)",
+          "items": {
+            "type": "string",
+            "enum": [
+              "save",
+              "focus"
+            ]
           }
         }
       }
