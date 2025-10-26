@@ -184,6 +184,8 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	triggerManager?.deactivate();
 	timerManager?.dispose();
+	// キャッシュをクリア
+	regexCache.clear();
 	console.log('[code-mantra] Extension deactivated');
 }
 
@@ -290,20 +292,30 @@ function shouldProcessDocument(document: vscode.TextDocument): boolean {
 	return true;
 }
 
+// Glob pattern matching utilities
+const DOUBLESTAR_PLACEHOLDER = '###DOUBLESTAR###';
+const regexCache = new Map<string, RegExp>();
+
 function matchesGlobPattern(filePath: string, pattern: string): boolean {
 	// 簡易的なglobパターンマッチング
-	const regexPattern = pattern
-		.replace(/\\/g, '/') // Windowsパス区切り文字を統一
-		.replace(/\*\*/g, '###DOUBLESTAR###')
-		.replace(/\*/g, '[^/]*')
-		.replace(/###DOUBLESTAR###/g, '.*')
-		.replace(/\?/g, '.');
+	let regex = regexCache.get(pattern);
+	
+	if (!regex) {
+		const regexPattern = pattern
+			.replace(/\\/g, '/') // Windowsパス区切り文字を統一
+			.replace(/\*\*/g, DOUBLESTAR_PLACEHOLDER)
+			.replace(/\*/g, '[^/]*')
+			.replace(new RegExp(DOUBLESTAR_PLACEHOLDER, 'g'), '.*')
+			.replace(/\?/g, '.');
+
+		regex = new RegExp(`^${regexPattern}$`);
+		regexCache.set(pattern, regex);
+	}
 
 	const normalizedPath = filePath.replace(/\\/g, '/');
-	const regex = new RegExp(`^${regexPattern}$`);
 	const result = regex.test(normalizedPath);
 	
-	console.log(`[code-mantra] Pattern match: "${normalizedPath}" vs "${regexPattern}" = ${result}`);
+	console.log(`[code-mantra] Pattern match: "${normalizedPath}" vs "${pattern}" = ${result}`);
 	return result;
 }
 
