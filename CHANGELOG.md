@@ -2,6 +2,16 @@
 
 All notable changes to the "code-mantra" extension will be documented in this file.
 
+## [1.0.5] - 2025-10-26
+
+### Added
+
+- Enabled Markdown/MDX in the default `codeMantra.fileTypes` so documentation workflows receive reminders out of the box
+
+### Improved
+
+- Enriched settings schema descriptions with trigger and rule tables for a clearer configuration experience in VS Code
+
 ## [1.0.4] - 2025-10-26
 
 ### Fixed
