@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import { TriggerManager } from './triggerManager';
 import { TimerManager, TimeBasedNotification } from './timerManager';
+import { TriggerTreeDataProvider, TriggerTreeItem } from './triggerTreeView';
+import { TriggerDialog } from './triggerDialog';
 
 let triggerManager: TriggerManager | undefined;
 let timerManager: TimerManager | undefined;
@@ -15,6 +17,82 @@ export function activate(context: vscode.ExtensionContext) {
 	// TimerManagerを初期化
 	timerManager = new TimerManager();
 	initializeTimers();
+
+	// TreeViewの初期化
+	const triggerTreeDataProvider = new TriggerTreeDataProvider(context);
+	const treeView = vscode.window.createTreeView('codeMantraTriggers', {
+		treeDataProvider: triggerTreeDataProvider,
+		showCollapseAll: false,
+		canSelectMany: false
+	});
+	context.subscriptions.push(treeView);
+
+	// チェックボックスの状態変更を処理
+	treeView.onDidChangeCheckboxState(async (e) => {
+		for (const [item] of e.items) {
+			if (item instanceof TriggerTreeItem) {
+				await triggerTreeDataProvider.toggleTrigger(item.index);
+			}
+		}
+	});
+
+	// トリガー追加コマンド
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.addTrigger', async () => {
+			const newTrigger = await TriggerDialog.showAddDialog();
+			if (newTrigger) {
+				await triggerTreeDataProvider.addTrigger(newTrigger);
+			}
+		})
+	);
+
+	// トリガー編集コマンド
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.editTrigger', async (item: TriggerTreeItem) => {
+			const updatedTrigger = await TriggerDialog.showEditDialog(item.rule);
+			if (updatedTrigger) {
+				await triggerTreeDataProvider.updateTrigger(item.index, updatedTrigger);
+			}
+		})
+	);
+
+	// トリガー削除コマンド
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.deleteTrigger', async (item: TriggerTreeItem) => {
+			const confirmed = await TriggerDialog.confirmDelete(item.rule.message);
+			if (confirmed) {
+				await triggerTreeDataProvider.deleteTrigger(item.index);
+			}
+		})
+	);
+
+	// トリガー有効/無効切り替えコマンド
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.toggleTrigger', async (item: TriggerTreeItem) => {
+			await triggerTreeDataProvider.toggleTrigger(item.index);
+		})
+	);
+
+	// トリガーを上に移動コマンド
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.moveTriggerUp', async (item: TriggerTreeItem) => {
+			await triggerTreeDataProvider.moveUp(item.index);
+		})
+	);
+
+	// トリガーを下に移動コマンド
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.moveTriggerDown', async (item: TriggerTreeItem) => {
+			await triggerTreeDataProvider.moveDown(item.index);
+		})
+	);
+
+	// トリガー更新コマンド
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.refreshTriggers', () => {
+			triggerTreeDataProvider.refresh();
+		})
+	);
 
 	// 設定変更時に再初期化
 	context.subscriptions.push(

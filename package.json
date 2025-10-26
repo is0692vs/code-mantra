@@ -3,7 +3,7 @@
   "publisher": "hirokimukai",
   "displayName": "Code Mantra",
   "description": "Remind yourself of programming principles with customizable notifications",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "icon": "icon.png",
   "galleryBanner": {
     "color": "#1e1e1e",
@@ -40,12 +40,107 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codeMantraPanel",
+          "title": "Code Mantra",
+          "icon": "$(bell)"
+        }
+      ]
+    },
+    "views": {
+      "codeMantraPanel": [
+        {
+          "id": "codeMantraTriggers",
+          "name": "トリガー",
+          "icon": "$(bell)",
+          "contextualTitle": "Code Mantra Triggers"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "code-mantra.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "code-mantra.addTrigger",
+        "title": "トリガーを追加",
+        "icon": "$(add)"
+      },
+      {
+        "command": "code-mantra.editTrigger",
+        "title": "トリガーを編集",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "code-mantra.deleteTrigger",
+        "title": "トリガーを削除",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "code-mantra.toggleTrigger",
+        "title": "トリガーの有効/無効を切り替え",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "code-mantra.moveTriggerUp",
+        "title": "上に移動",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "code-mantra.moveTriggerDown",
+        "title": "下に移動",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "code-mantra.refreshTriggers",
+        "title": "更新",
+        "icon": "$(refresh)"
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "code-mantra.addTrigger",
+          "when": "view == codeMantraTriggers",
+          "group": "navigation"
+        },
+        {
+          "command": "code-mantra.refreshTriggers",
+          "when": "view == codeMantraTriggers",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "code-mantra.editTrigger",
+          "when": "view == codeMantraTriggers && viewItem == triggerRule",
+          "group": "inline@1"
+        },
+        {
+          "command": "code-mantra.toggleTrigger",
+          "when": "view == codeMantraTriggers && viewItem == triggerRule",
+          "group": "inline@2"
+        },
+        {
+          "command": "code-mantra.deleteTrigger",
+          "when": "view == codeMantraTriggers && viewItem == triggerRule",
+          "group": "actions@1"
+        },
+        {
+          "command": "code-mantra.moveTriggerUp",
+          "when": "view == codeMantraTriggers && viewItem == triggerRule",
+          "group": "actions@2"
+        },
+        {
+          "command": "code-mantra.moveTriggerDown",
+          "when": "view == codeMantraTriggers && viewItem == triggerRule",
+          "group": "actions@3"
+        }
+      ]
+    },
     "configuration": {
       "title": "Code Mantra",
       "properties": {
@@ -170,6 +265,11 @@
                 "type": "string",
                 "default": "**/*.*",
                 "description": "Glob pattern for file matching (e.g., **/*.ts)"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Enable or disable this rule"
               }
             }
           }
