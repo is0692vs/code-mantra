@@ -197,7 +197,6 @@ function initializeTimers(): void {
 	const timeBasedEnabled = config.get<boolean>('timeBasedNotifications.enabled', true);
 
 	// Clear all existing timers first
-	timerManager?.clearAllTimers();
 
 	// Process rules array for onTimer triggers
 	const rules = config.get<Array<{
