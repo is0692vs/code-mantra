@@ -153,6 +153,56 @@ Add your own rules in `settings.json`:
 | `message`     | Text shown in the notification toast.                   | Keep it short and actionable.                            |
 | `filePattern` | Optional glob to scope the rule.                        | Example: `**/*.md` (defaults to all files when omitted). |
 
+### Time-Based Notifications
+
+Code Mantra can show notifications at regular time intervals to remind you to take breaks or follow the Pomodoro Technique:
+
+```json
+{
+  "codeMantra.timeBasedNotifications": {
+    "enabled": true,
+    "intervals": [
+      {
+        "duration": 50,
+        "message": "💡 Time to take a break! Step away from your screen.",
+        "type": "workBreak",
+        "enabled": true
+      },
+      {
+        "duration": 25,
+        "message": "🍅 Pomodoro complete! Take a short break.",
+        "type": "pomodoro",
+        "enabled": false
+      }
+    ],
+    "resetOn": ["save"]
+  }
+}
+```
+
+**Features:**
+
+- ⏰ **Multiple Timers**: Run multiple independent timers simultaneously
+- 🔄 **Auto-Reset**: Optionally reset timers on specific events (save, focus)
+- 🍅 **Pomodoro Support**: Built-in support for Pomodoro Technique (25 min intervals)
+- 💼 **Work Break Reminders**: Long-form work session reminders (50 min default)
+- 🎨 **Custom Intervals**: Define your own timing patterns
+
+**Timer Types:**
+
+| Type        | Description                      | Typical Duration |
+| ----------- | -------------------------------- | ---------------- |
+| `workBreak` | Standard work break reminder     | 50 minutes       |
+| `pomodoro`  | Pomodoro Technique timer         | 25 minutes       |
+| `custom`    | Your own custom interval pattern | 1-120 minutes    |
+
+**Reset Events:**
+
+- `save`: Reset all timers when you save a file (keeps you in flow)
+- `focus`: Reset all timers when the editor gains focus
+
+**Tip:** Enable `resetOn: ["save"]` to avoid interruptions during deep work sessions. Your timers will automatically restart each time you save, keeping you in the zone!
+
 ## Installation
 
 1. Open VS Code

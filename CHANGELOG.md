@@ -2,6 +2,25 @@
 
 All notable changes to the "code-mantra" extension will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Time-based notifications feature for interval reminders
+- TimerManager class for managing recurring notification timers
+- Support for multiple simultaneous timers with independent durations
+- Pomodoro Technique timer support (25-minute intervals)
+- Work break reminders (50-minute intervals by default)
+- Custom timer intervals (1-120 minutes)
+- Auto-reset functionality on specific events (save, focus)
+- Comprehensive time-based notification configuration schema with table-based UI
+- Tests for TimerManager class (5 test cases covering start/stop, multiple timers, reset, disabled timers, and timer restart)
+
+### Improved
+
+- Enhanced documentation with time-based notifications section in README.md and README.ja.md
+- Added detailed timer type descriptions and reset event explanations
+
 ## [1.0.5] - 2025-10-26
 
 ### Added
