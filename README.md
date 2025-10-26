@@ -1,19 +1,71 @@
 # Code Mantra
 
+[![Version](https://img.shields.io/visual-studio-marketplace/v/hirokimukai.code-mantra?style=flat-square&label=VS%20Code%20Marketplace&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/hirokimukai.code-mantra?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra)
+[![Rating](https://img.shields.io/visual-studio-marketplace/r/hirokimukai.code-mantra?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra)
+[![License](https://img.shields.io/github/license/is0692vs/code-mantra?style=flat-square)](./LICENSE)
+
 [English](./README.md) | [日本語](./README.ja.md)
 
-Remind yourself of programming principles with customizable notifications in VS Code.
+> Remind yourself of programming principles with customizable notifications in VS Code.
 
-## Features
+Code Mantra helps you build better coding habits by showing timely reminders of programming principles while you code. Whether you're a beginner learning best practices or an experienced developer who wants gentle nudges to maintain code quality, Code Mantra keeps important principles top of mind.
 
-Code Mantra helps you build better coding habits by showing reminders of programming principles.
+<!-- TODO: Add demo GIF or screenshot here -->
+<!-- ![Code Mantra in action](./images/demo.gif) -->
 
-- 💡 **Multiple Triggers**: Show notifications on save, edit, open, or focus
-- 🎯 **Customizable File Types**: Choose which languages to monitor
-- 🔧 **Flexible Configuration**: Easy setup via VS Code settings
-- 🚫 **Exclude Patterns**: Ignore specific files or directories
-- 📚 **Built-in Presets**: Pragmatic Programmer principles (ETC, DRY)
-- ⚙️ **Smart Notifications**: Automatic rate limiting to avoid spam
+## ✨ Features
+
+### � Multiple Trigger Types
+
+Show notifications when you need them:
+
+- **On Save** (recommended) - Get reminders before committing changes
+- **On Edit** - Gentle nudges while coding with configurable debouncing
+- **On Open** - Start each file with a principle reminder
+- **On Focus** - Get refreshed when switching between files
+
+### ⏰ Time-Based Notifications
+
+Stay healthy and productive with periodic reminders:
+
+- **Work Break Reminders** - Regular intervals to step away from your screen
+- **Pomodoro Timer** - Built-in 25-minute work session support
+- **Custom Timers** - Create your own interval patterns
+- **Auto-Reset** - Optionally reset timers on file save or focus events
+
+### 🎯 Smart Targeting
+
+- **25+ Programming Languages** - Support for all major languages
+- **Glob Pattern Exclusions** - Easily ignore node_modules, dist, and other directories
+- **Custom File Patterns** - Target specific file types with your own rules
+- **Rate Limiting** - Automatic spam prevention (minimum 3-second intervals)
+
+### 📚 Built-in Wisdom
+
+Pre-configured reminders from "The Pragmatic Programmer":
+
+- **ETC** - Easier To Change?
+- **DRY** - Don't Repeat Yourself
+- **Add Your Own** - Fully customizable message system
+
+## 🚀 Quick Start
+
+1. **Install the extension** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra)
+
+2. **Start coding** - Code Mantra works out of the box with sensible defaults!
+
+3. **Customize (optional)** - Open VS Code Settings (`Ctrl/Cmd + ,`) and search for "Code Mantra" to personalize your experience
+
+### First-Time Setup
+
+By default, Code Mantra will show reminders when you **save files** in any supported programming language. This is the recommended setting for most users.
+
+To enable additional features:
+
+- ⏰ **Enable time-based notifications** for work break reminders
+- ✏️ **Enable edit triggers** for real-time coding reminders
+- 🎨 **Customize messages** to match your coding philosophy
 
 ## Usage
 
@@ -258,18 +310,63 @@ This creates a GitHub Release and publishes to VS Code Marketplace.
 - **release.yml**: `v*` tags → GitHub Release (VSIX attached)
 - **publish.yml**: `v*-publish` tags → GitHub Release + Marketplace publish
 
-## Roadmap
+## 🗺️ Roadmap
 
 - [x] Add extension icon (128x128 PNG)
+- [x] Time-based notifications with multiple timers
+- [x] Auto-reset timers on events
 - [ ] Add demo GIF to README
 - [ ] Support more file types
-- [ ] Add custom message frequency settings
+- [ ] Custom notification sounds
+- [ ] Statistics dashboard (track your coding habits)
 - [ ] Dark/light mode icons
+- [ ] AI-powered principle suggestions
 
-## License
+## 🤝 Contributing
 
-MIT
+Contributions are welcome! Here's how you can help:
 
-## Inspiration
+1. **Report Bugs** - [Open an issue](https://github.com/is0692vs/code-mantra/issues) with detailed information
+2. **Suggest Features** - Share your ideas for new features or improvements
+3. **Submit Pull Requests** - Fix bugs or implement new features
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/is0692vs/code-mantra.git
+cd code-mantra
+
+# Install dependencies
+npm install
+
+# Run in debug mode
+# Press F5 in VS Code to launch Extension Development Host
+
+# Run tests
+npm test
+```
+
+### Guidelines
+
+- Follow the existing code style
+- Add tests for new features
+- Update documentation as needed
+- Keep commits atomic and well-described
+
+## 📄 License
+
+MIT License - see [LICENSE](./LICENSE) for details
+
+## 💡 Inspiration
 
 Inspired by "The Pragmatic Programmer" by David Thomas and Andrew Hunt.
+
+## 🙏 Acknowledgments
+
+- Thanks to all contributors who help make Code Mantra better
+- Special thanks to the VS Code extension community for best practices and guidance
+
+---
+
+**Enjoying Code Mantra?** Consider [leaving a review](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra&ssr=false#review-details) or [starring the repo](https://github.com/is0692vs/code-mantra)! ⭐

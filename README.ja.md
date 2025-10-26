@@ -1,17 +1,71 @@
 # Code Mantra
 
+[![Version](https://img.shields.io/visual-studio-marketplace/v/hirokimukai.code-mantra?style=flat-square&label=VS%20Code%20Marketplace&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/hirokimukai.code-mantra?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra)
+[![Rating](https://img.shields.io/visual-studio-marketplace/r/hirokimukai.code-mantra?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra)
+[![License](https://img.shields.io/github/license/is0692vs/code-mantra?style=flat-square)](./LICENSE)
+
 [English](./README.md) | [日本語](./README.ja.md)
 
-VS Code でカスタマイズ可能な通知によるプログラミング原則のリマインダー拡張機能。
+> VS Code でカスタマイズ可能な通知によるプログラミング原則のリマインダー拡張機能。
 
-## 機能
+Code Mantra は、コーディング中にプログラミング原則のタイムリーなリマインダーを表示することで、より良いコーディング習慣の構築を支援します。ベストプラクティスを学んでいる初心者でも、コード品質を維持したい経験豊富な開発者でも、Code Mantra は重要な原則を常に意識できるようにします。
 
-- **複数のトリガー**: ファイル保存時、編集中、ファイルオープン時、フォーカス時に通知
-- **カスタマイズ可能なファイルタイプ**: 25 種類以上のプログラミング言語をサポート
-- **除外パターン**: グロブパターンで特定のファイル/ディレクトリを除外
-- **編集トリガーのデバウンス**: 指定した遅延後に通知を表示（デフォルト 5 秒）
-- **レート制限**: 短時間に過度な通知を防止（最小 3 秒間隔）
-- **設定駆動**: VS Code 設定で完全にカスタマイズ可能
+<!-- TODO: デモGIFまたはスクリーンショットを追加 -->
+<!-- ![Code Mantra の動作](./images/demo.gif) -->
+
+## ✨ 機能
+
+### 🔔 複数のトリガータイプ
+
+必要なタイミングで通知を表示:
+
+- **保存時**(推奨) - 変更をコミットする前にリマインダーを取得
+- **編集時** - 設定可能なデバウンスでコーディング中に優しくリマインド
+- **オープン時** - 各ファイルを原則のリマインダーで開始
+- **フォーカス時** - ファイル間を切り替えるときにリフレッシュ
+
+### ⏰ 時間ベースの通知
+
+定期的なリマインダーで健康的で生産的に:
+
+- **作業休憩リマインダー** - 画面から離れるための定期的な間隔
+- **ポモドーロタイマー** - 25 分作業セッションの組み込みサポート
+- **カスタムタイマー** - 独自の間隔パターンを作成
+- **自動リセット** - ファイル保存またはフォーカスイベントでタイマーをオプションでリセット
+
+### 🎯 スマートターゲティング
+
+- **25 種類以上のプログラミング言語** - すべての主要言語をサポート
+- **グロブパターン除外** - node_modules、dist、その他のディレクトリを簡単に無視
+- **カスタムファイルパターン** - 独自のルールで特定のファイルタイプをターゲット
+- **レート制限** - 自動スパム防止(最小 3 秒間隔)
+
+### 📚 組み込みの知恵
+
+「The Pragmatic Programmer」からの事前設定されたリマインダー:
+
+- **ETC** - Easier To Change?(変更しやすいか?)
+- **DRY** - Don't Repeat Yourself(繰り返しを避ける)
+- **独自追加** - 完全にカスタマイズ可能なメッセージシステム
+
+## 🚀 クイックスタート
+
+1. **拡張機能をインストール** - [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra) から
+
+2. **コーディングを開始** - Code Mantra は適切なデフォルト設定ですぐに動作します!
+
+3. **カスタマイズ(オプション)** - VS Code 設定を開き(`Ctrl/Cmd + ,`)、「Code Mantra」を検索して体験をパーソナライズ
+
+### 初回セットアップ
+
+デフォルトでは、Code Mantra はサポートされているプログラミング言語で**ファイルを保存**したときにリマインダーを表示します。これはほとんどのユーザーに推奨される設定です。
+
+追加機能を有効にするには:
+
+- ⏰ **時間ベースの通知を有効化** - 作業休憩リマインダー用
+- ✏️ **編集トリガーを有効化** - リアルタイムのコーディングリマインダー用
+- 🎨 **メッセージをカスタマイズ** - コーディング哲学に合わせる
 
 ## 設定方法
 
@@ -301,14 +355,55 @@ npx @vscode/vsce package
 - **トリガーマネージャー**: すべてのトリガータイプの統一イベント管理
 - **グロブマッチング**: ファイル除外に`minimatch`ライブラリを使用
 
-## ライセンス
+## 🗺️ ロードマップ
 
-MIT
+- [x] 🎨 拡張機能アイコンの追加
+- [x] ⏰ 時間ベース通知の実装
+- [x] 🔄 時間ベース通知の自動リセット機能
+- [ ] 📸 デモスクリーンショット/GIF の追加
+- [ ] 🔊 カスタムサウンド通知
+- [ ] 📊 統計ダッシュボード
+- [ ] 🤖 AI ベースのコンテキスト提案
 
-## 貢献
+## 🤝 コントリビューティング
 
-貢献を歓迎します！問題の報告やプルリクエストの送信は GitHub リポジトリで受け付けています。
+プルリクエスト大歓迎です!主要な変更の場合は、まず issue を開いて変更したい内容を議論してください。
 
-## 変更履歴
+### お手伝いの方法
 
-変更履歴の詳細は[CHANGELOG.md](./CHANGELOG.md)を参照してください。
+- 🐛 バグを報告 - [Issue tracker](https://github.com/is0692vs/code-mantra/issues)
+- ✨ 機能をリクエスト - 新しいアイデアを共有
+- 🌍 翻訳を追加 - より多くの言語でアクセス可能に
+- 📖 ドキュメントを改善 - あらゆる改善が役立ちます
+- 💻 コードに貢献 - プルリクエストを送信
+
+### 開発セットアップ
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/is0692vs/code-mantra.git
+
+# 依存関係をインストール
+npm install
+
+# 開発モードで実行(F5 を押して拡張機能開発ホストを起動)
+```
+
+### ガイドライン
+
+- TypeScript 標準に従う
+- 新機能には適切なテストを追加
+- コミットメッセージは明確に
+- コードをプッシュする前に `npm test` を実行
+
+## 📜 ライセンス
+
+このプロジェクトは [MIT License](./LICENSE) の下でライセンスされています。
+
+## 🙏 謝辞
+
+素晴らしい VS Code コミュニティとオープンソースの貢献者の皆様に感謝します。
+
+---
+
+**Code Mantra は役立ちましたか?** ⭐ [GitHub](https://github.com/is0692vs/code-mantra) でスターをつけるか、[レビュー](https://marketplace.visualstudio.com/items?itemName=hirokimukai.code-mantra&ssr=false#review-details)を書いて改善にご協力ください!
