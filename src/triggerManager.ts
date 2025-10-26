@@ -16,7 +16,7 @@ export class TriggerManager {
     private disposables: vscode.Disposable[] = [];
     private editDebounceTimer: NodeJS.Timeout | undefined;
     private lastNotificationTime: number = 0;
-    private readonly MIN_NOTIFICATION_INTERVAL = 3000; // 3秒間隔
+    private readonly MIN_NOTIFICATION_INTERVAL = 1000; // 1秒間隔（デバッグ用に短縮）
 
     constructor(
         private context: vscode.ExtensionContext,
@@ -75,7 +75,9 @@ export class TriggerManager {
 
     private shouldShowNotification(): boolean {
         const now = Date.now();
+        console.log(`[code-mantra] Notification throttle check: ${now - this.lastNotificationTime}ms since last notification (min: ${this.MIN_NOTIFICATION_INTERVAL}ms)`);
         if (now - this.lastNotificationTime < this.MIN_NOTIFICATION_INTERVAL) {
+            console.log('[code-mantra] Notification throttled');
             return false;
         }
         this.lastNotificationTime = now;
@@ -84,6 +86,7 @@ export class TriggerManager {
 
     private registerOnSave(): void {
         const listener = vscode.workspace.onDidSaveTextDocument((document) => {
+            console.log(`[code-mantra] onSave event triggered for: ${document.uri.fsPath}`);
             if (this.shouldShowNotification()) {
                 this.onTrigger(document);
             }

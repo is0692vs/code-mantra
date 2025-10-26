@@ -65,6 +65,11 @@
         "title": "Hello World"
       },
       {
+        "command": "code-mantra.testNotification",
+        "title": "Test Notification",
+        "icon": "$(bell)"
+      },
+      {
         "command": "code-mantra.addTrigger",
         "title": "トリガーを追加",
         "icon": "$(add)"

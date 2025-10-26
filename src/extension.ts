@@ -10,6 +10,17 @@ let timerManager: TimerManager | undefined;
 export function activate(context: vscode.ExtensionContext) {
 	console.log('[code-mantra] Extension activated');
 
+	// 設定の初期状態をログ出力
+	const initialConfig = vscode.workspace.getConfiguration('codeMantra');
+	console.log('[code-mantra] Current configuration:', {
+		enabled: initialConfig.get('enabled'),
+		'triggers.onSave.enabled': initialConfig.get('triggers.onSave.enabled'),
+		'triggers.onEdit.enabled': initialConfig.get('triggers.onEdit.enabled'),
+		'triggers.onOpen.enabled': initialConfig.get('triggers.onOpen.enabled'),
+		'triggers.onFocus.enabled': initialConfig.get('triggers.onFocus.enabled'),
+		rules: initialConfig.get('rules')
+	});
+
 	// TriggerManagerを初期化
 	triggerManager = new TriggerManager(context, handleTrigger);
 	triggerManager.activate();
@@ -35,6 +46,29 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}
 	});
+
+	// Hello World コマンド（デバッグ用）
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.helloWorld', () => {
+			console.log('[code-mantra] Hello World command executed');
+			vscode.window.showInformationMessage('🔔 Hello World from Code Mantra!');
+		})
+	);
+
+	// Test Notification コマンド（デバッグ用）
+	context.subscriptions.push(
+		vscode.commands.registerCommand('code-mantra.testNotification', () => {
+			console.log('[code-mantra] Test notification command executed');
+			const activeEditor = vscode.window.activeTextEditor;
+			if (activeEditor) {
+				console.log(`[code-mantra] Active editor found: ${activeEditor.document.uri.fsPath}`);
+				handleTrigger(activeEditor.document);
+			} else {
+				console.log('[code-mantra] No active editor, showing test notification');
+				showNotification('Test notification from Code Mantra!');
+			}
+		})
+	);
 
 	// トリガー追加コマンド
 	context.subscriptions.push(
@@ -186,20 +220,44 @@ function reinitializeTimers(): void {
 }
 
 function handleTrigger(document: vscode.TextDocument): void {
+	console.log(`[code-mantra] handleTrigger called for: ${document.uri.fsPath}`);
+
 	if (!isExtensionEnabled()) {
+		console.log('[code-mantra] Extension is disabled');
 		return;
 	}
 
 	if (!shouldProcessDocument(document)) {
+		console.log('[code-mantra] Document should not be processed');
 		return;
 	}
 
 	const rules = getRules();
-	const matchingRules = rules.filter(() => true); // 全ルールを対象（filePatternチェックは削除）
+	console.log(`[code-mantra] Found ${rules.length} rules:`, rules);
+
+	const matchingRules = rules.filter(rule => {
+		// 有効性チェック
+		if (rule.enabled === false) {
+			return false;
+		}
+		
+		// ファイルパターンチェック
+		if (!rule.filePattern) {
+			return true; // パターンが指定されていない場合は全ファイル対象
+		}
+		
+		const matches = matchesGlobPattern(document.uri.fsPath, rule.filePattern);
+		console.log(`[code-mantra] Rule "${rule.message}" pattern "${rule.filePattern}" matches: ${matches}`);
+		return matches;
+	});
+	console.log(`[code-mantra] ${matchingRules.length} matching rules`);
 
 	if (matchingRules.length > 0) {
 		const randomRule = matchingRules[Math.floor(Math.random() * matchingRules.length)];
+		console.log(`[code-mantra] Selected rule:`, randomRule);
 		showNotification(randomRule.message);
+	} else {
+		console.log('[code-mantra] No matching rules found');
 	}
 }
 
@@ -235,20 +293,31 @@ function shouldProcessDocument(document: vscode.TextDocument): boolean {
 function matchesGlobPattern(filePath: string, pattern: string): boolean {
 	// 簡易的なglobパターンマッチング
 	const regexPattern = pattern
-		.replace(/\*\*/g, '.*')
+		.replace(/\\/g, '/') // Windowsパス区切り文字を統一
+		.replace(/\*\*/g, '###DOUBLESTAR###')
 		.replace(/\*/g, '[^/]*')
+		.replace(/###DOUBLESTAR###/g, '.*')
 		.replace(/\?/g, '.');
 
-	const regex = new RegExp(regexPattern);
-	return regex.test(filePath);
+	const normalizedPath = filePath.replace(/\\/g, '/');
+	const regex = new RegExp(`^${regexPattern}$`);
+	const result = regex.test(normalizedPath);
+	
+	console.log(`[code-mantra] Pattern match: "${normalizedPath}" vs "${regexPattern}" = ${result}`);
+	return result;
 }
 
-function getRules(): Array<{ trigger: string, message: string, filePattern: string }> {
+function getRules(): Array<{ trigger: string, message: string, filePattern?: string, enabled?: boolean }> {
 	const config = vscode.workspace.getConfiguration('codeMantra');
-	return config.get<Array<{ trigger: string, message: string, filePattern: string }>>('rules', []);
+	return config.get<Array<{ trigger: string, message: string, filePattern?: string, enabled?: boolean }>>('rules', []);
 }
 
 function showNotification(message: string): void {
 	console.log(`[code-mantra] Displaying notification: ${message}`);
-	vscode.window.showInformationMessage(message);
+	
+	// 通知の表示を強制的に試行
+	vscode.window.showInformationMessage(`🔔 Code Mantra: ${message}`).then(
+		() => console.log(`[code-mantra] Notification displayed successfully`),
+		(error) => console.error(`[code-mantra] Failed to display notification:`, error)
+	);
 }
