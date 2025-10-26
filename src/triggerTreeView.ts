@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 
 export interface TriggerRule {
-    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus';
+    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onTimer';
     message: string;
     filePattern?: string;
     enabled?: boolean;
+    duration?: number; // duration in minutes (only for onTimer)
+    timerType?: 'workBreak' | 'pomodoro' | 'custom'; // timer type (only for onTimer)
 }
 
 export class TriggerTreeItem extends vscode.TreeItem {
@@ -29,11 +31,20 @@ export class TriggerTreeItem extends vscode.TreeItem {
 
     private getTooltip(): string {
         const status = this.rule.enabled !== false ? '✅ Enabled' : '❌ Disabled';
+        if (this.rule.trigger === 'onTimer') {
+            const duration = this.rule.duration || 25;
+            const type = this.rule.timerType || 'custom';
+            return `${status}\nTrigger: Time-based (every ${duration} min)\nType: ${type}`;
+        }
         const pattern = this.rule.filePattern || '**/*.*';
         return `${status}\nTrigger: ${this.rule.trigger}\nPattern: ${pattern}`;
     }
 
     private getDescription(): string {
+        if (this.rule.trigger === 'onTimer') {
+            const duration = this.rule.duration || 25;
+            return `${this.getTriggerLabel()} • Every ${duration} min`;
+        }
         const pattern = this.rule.filePattern || 'All files';
         return `${this.getTriggerLabel()} • ${pattern}`;
     }
@@ -44,6 +55,7 @@ export class TriggerTreeItem extends vscode.TreeItem {
             case 'onEdit': return '✏️ On Edit';
             case 'onOpen': return '📂 On Open';
             case 'onFocus': return '🎯 On Focus';
+            case 'onTimer': return '⏰ Timer';
             default: return this.rule.trigger;
         }
     }
@@ -58,6 +70,8 @@ export class TriggerTreeItem extends vscode.TreeItem {
                 return new vscode.ThemeIcon('folder-opened', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.yellow' : 'disabledForeground'));
             case 'onFocus':
                 return new vscode.ThemeIcon('target', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.purple' : 'disabledForeground'));
+            case 'onTimer':
+                return new vscode.ThemeIcon('watch', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.orange' : 'disabledForeground'));
             default:
                 return new vscode.ThemeIcon('bell');
         }
