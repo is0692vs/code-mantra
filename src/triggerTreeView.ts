@@ -20,30 +20,30 @@ export class TriggerTreeItem extends vscode.TreeItem {
         this.iconPath = this.getIcon();
         this.contextValue = 'triggerRule';
 
-        // チェックボックスの状態を設定
+        // Set checkbox state
         this.checkboxState = {
             state: rule.enabled !== false ? vscode.TreeItemCheckboxState.Checked : vscode.TreeItemCheckboxState.Unchecked,
-            tooltip: rule.enabled !== false ? 'トリガーを無効化' : 'トリガーを有効化'
+            tooltip: rule.enabled !== false ? 'Disable trigger' : 'Enable trigger'
         };
     }
 
     private getTooltip(): string {
-        const status = this.rule.enabled !== false ? '✅ 有効' : '❌ 無効';
+        const status = this.rule.enabled !== false ? '✅ Enabled' : '❌ Disabled';
         const pattern = this.rule.filePattern || '**/*.*';
-        return `${status}\nトリガー: ${this.rule.trigger}\nパターン: ${pattern}`;
+        return `${status}\nTrigger: ${this.rule.trigger}\nPattern: ${pattern}`;
     }
 
     private getDescription(): string {
-        const pattern = this.rule.filePattern || '全てのファイル';
+        const pattern = this.rule.filePattern || 'All files';
         return `${this.getTriggerLabel()} • ${pattern}`;
     }
 
     private getTriggerLabel(): string {
         switch (this.rule.trigger) {
-            case 'onSave': return '💾 保存時';
-            case 'onEdit': return '✏️ 編集時';
-            case 'onOpen': return '📂 開く時';
-            case 'onFocus': return '🎯 フォーカス時';
+            case 'onSave': return '💾 On Save';
+            case 'onEdit': return '✏️ On Edit';
+            case 'onOpen': return '📂 On Open';
+            case 'onFocus': return '🎯 On Focus';
             default: return this.rule.trigger;
         }
     }
@@ -112,7 +112,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
         await config.update('rules', rules, vscode.ConfigurationTarget.Global);
         this.refresh();
 
-        vscode.window.showInformationMessage(`トリガー「${trigger.message}」を追加しました`);
+        vscode.window.showInformationMessage(`Added trigger "${trigger.message}"`);
     }
 
     async updateTrigger(index: number, trigger: TriggerRule): Promise<void> {
@@ -123,7 +123,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
             rules[index] = trigger;
             await config.update('rules', rules, vscode.ConfigurationTarget.Global);
             this.refresh();
-            vscode.window.showInformationMessage(`トリガー「${trigger.message}」を更新しました`);
+            vscode.window.showInformationMessage(`Updated trigger "${trigger.message}"`);
         }
     }
 
@@ -136,7 +136,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
             rules.splice(index, 1);
             await config.update('rules', rules, vscode.ConfigurationTarget.Global);
             this.refresh();
-            vscode.window.showInformationMessage(`トリガー「${deletedRule.message}」を削除しました`);
+            vscode.window.showInformationMessage(`Deleted trigger "${deletedRule.message}"`);
         }
     }
 
@@ -149,8 +149,8 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
             await config.update('rules', rules, vscode.ConfigurationTarget.Global);
             this.refresh();
 
-            const status = rules[index].enabled ? '有効化' : '無効化';
-            vscode.window.showInformationMessage(`トリガー「${rules[index].message}」を${status}しました`);
+            const status = rules[index].enabled ? 'enabled' : 'disabled';
+            vscode.window.showInformationMessage(`Trigger "${rules[index].message}" ${status}`);
         }
     }
 

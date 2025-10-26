@@ -16,7 +16,7 @@ export class TriggerManager {
     private disposables: vscode.Disposable[] = [];
     private editDebounceTimer: NodeJS.Timeout | undefined;
     private lastNotificationTime: number = 0;
-    private readonly MIN_NOTIFICATION_INTERVAL = 1000; // 1秒間隔（デバッグ用に短縮）
+    private readonly MIN_NOTIFICATION_INTERVAL = 1000; // 1 second minimum interval (short for debugging)
 
     constructor(
         private context: vscode.ExtensionContext,
@@ -54,21 +54,21 @@ export class TriggerManager {
 
     private getTriggersConfig(): TriggersConfig {
         const config = vscode.workspace.getConfiguration('codeMantra');
-        
+
         // 新しいフラットな設定構造から読み取り
         return {
-            onSave: { 
-                enabled: config.get<boolean>('triggers.onSave.enabled', true) 
+            onSave: {
+                enabled: config.get<boolean>('triggers.onSave.enabled', true)
             },
-            onEdit: { 
+            onEdit: {
                 enabled: config.get<boolean>('triggers.onEdit.enabled', false),
                 delay: config.get<number>('triggers.onEdit.delay', 5000)
             },
-            onOpen: { 
-                enabled: config.get<boolean>('triggers.onOpen.enabled', false) 
+            onOpen: {
+                enabled: config.get<boolean>('triggers.onOpen.enabled', false)
             },
-            onFocus: { 
-                enabled: config.get<boolean>('triggers.onFocus.enabled', false) 
+            onFocus: {
+                enabled: config.get<boolean>('triggers.onFocus.enabled', false)
             }
         };
     }

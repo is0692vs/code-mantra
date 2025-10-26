@@ -10,7 +10,7 @@ let timerManager: TimerManager | undefined;
 export function activate(context: vscode.ExtensionContext) {
 	console.log('[code-mantra] Extension activated');
 
-	// 設定の初期状態をログ出力
+	// Log initial configuration
 	const initialConfig = vscode.workspace.getConfiguration('codeMantra');
 	console.log('[code-mantra] Current configuration:', {
 		enabled: initialConfig.get('enabled'),
@@ -21,15 +21,15 @@ export function activate(context: vscode.ExtensionContext) {
 		rules: initialConfig.get('rules')
 	});
 
-	// TriggerManagerを初期化
+	// Initialize TriggerManager
 	triggerManager = new TriggerManager(context, handleTrigger);
 	triggerManager.activate();
 
-	// TimerManagerを初期化
+	// Initialize TimerManager
 	timerManager = new TimerManager();
 	initializeTimers();
 
-	// TreeViewの初期化
+	// Initialize the TreeView
 	const triggerTreeDataProvider = new TriggerTreeDataProvider(context);
 	const treeView = vscode.window.createTreeView('codeMantraTriggers', {
 		treeDataProvider: triggerTreeDataProvider,
@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(treeView);
 
-	// チェックボックスの状態変更を処理
+	// Handle checkbox state changes
 	treeView.onDidChangeCheckboxState(async (e) => {
 		for (const [item] of e.items) {
 			if (item instanceof TriggerTreeItem) {
@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	// Hello World コマンド（デバッグ用）
+	// Hello World command (for debugging)
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.helloWorld', () => {
 			console.log('[code-mantra] Hello World command executed');
@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// Test Notification コマンド（デバッグ用）
+	// Test Notification command (for debugging)
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.testNotification', () => {
 			console.log('[code-mantra] Test notification command executed');
@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// トリガー追加コマンド
+	// Add trigger command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.addTrigger', async () => {
 			const newTrigger = await TriggerDialog.showAddDialog();
@@ -80,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// トリガー編集コマンド
+	// Edit trigger command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.editTrigger', async (item: TriggerTreeItem) => {
 			const updatedTrigger = await TriggerDialog.showEditDialog(item.rule);
@@ -90,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// トリガー削除コマンド
+	// Delete trigger command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.deleteTrigger', async (item: TriggerTreeItem) => {
 			const confirmed = await TriggerDialog.confirmDelete(item.rule.message);
@@ -100,35 +100,35 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// トリガー有効/無効切り替えコマンド
+	// Toggle trigger enabled/disabled command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.toggleTrigger', async (item: TriggerTreeItem) => {
 			await triggerTreeDataProvider.toggleTrigger(item.index);
 		})
 	);
 
-	// トリガーを上に移動コマンド
+	// Move trigger up command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.moveTriggerUp', async (item: TriggerTreeItem) => {
 			await triggerTreeDataProvider.moveUp(item.index);
 		})
 	);
 
-	// トリガーを下に移動コマンド
+	// Move trigger down command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.moveTriggerDown', async (item: TriggerTreeItem) => {
 			await triggerTreeDataProvider.moveDown(item.index);
 		})
 	);
 
-	// トリガー更新コマンド
+	// Refresh triggers command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('code-mantra.refreshTriggers', () => {
 			triggerTreeDataProvider.refresh();
 		})
 	);
 
-	// 設定変更時に再初期化
+	// Reinitialize on configuration changes
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration('codeMantra.triggers') ||
@@ -148,7 +148,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// タイマーリセットイベントの登録
+	// Register timer reset events
 	const config = vscode.workspace.getConfiguration('codeMantra');
 	const timeBasedEnabled = config.get<boolean>('timeBasedNotifications.enabled', true);
 	const resetOn = config.get<string[]>('timeBasedNotifications.resetOn', ['save']);
@@ -175,7 +175,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	// TimerManagerのクリーンアップを登録
+	// Register TimerManager cleanup
 	context.subscriptions.push({
 		dispose: () => timerManager?.dispose()
 	});
@@ -184,7 +184,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	triggerManager?.deactivate();
 	timerManager?.dispose();
-	// キャッシュをクリア
+	// Clear caches
 	regexCache.clear();
 	console.log('[code-mantra] Extension deactivated');
 }
@@ -242,12 +242,12 @@ function handleTrigger(document: vscode.TextDocument): void {
 		if (rule.enabled === false) {
 			return false;
 		}
-		
+
 		// ファイルパターンチェック
 		if (!rule.filePattern) {
 			return true; // パターンが指定されていない場合は全ファイル対象
 		}
-		
+
 		const matches = matchesGlobPattern(document.uri.fsPath, rule.filePattern);
 		console.log(`[code-mantra] Rule "${rule.message}" pattern "${rule.filePattern}" matches: ${matches}`);
 		return matches;
@@ -297,9 +297,9 @@ const DOUBLESTAR_PLACEHOLDER = '###DOUBLESTAR###';
 const regexCache = new Map<string, RegExp>();
 
 function matchesGlobPattern(filePath: string, pattern: string): boolean {
-	// 簡易的なglobパターンマッチング
+	// Simple glob pattern matching
 	let regex = regexCache.get(pattern);
-	
+
 	if (!regex) {
 		const regexPattern = pattern
 			.replace(/\\/g, '/') // Windowsパス区切り文字を統一
@@ -314,7 +314,7 @@ function matchesGlobPattern(filePath: string, pattern: string): boolean {
 
 	const normalizedPath = filePath.replace(/\\/g, '/');
 	const result = regex.test(normalizedPath);
-	
+
 	console.log(`[code-mantra] Pattern match: "${normalizedPath}" vs "${pattern}" = ${result}`);
 	return result;
 }
@@ -326,7 +326,7 @@ function getRules(): Array<{ trigger: string, message: string, filePattern?: str
 
 function showNotification(message: string): void {
 	console.log(`[code-mantra] Displaying notification: ${message}`);
-	
+
 	// 通知の表示を強制的に試行
 	vscode.window.showInformationMessage(`🔔 Code Mantra: ${message}`).then(
 		() => console.log(`[code-mantra] Notification displayed successfully`),

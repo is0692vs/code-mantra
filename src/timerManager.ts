@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 export interface TimeBasedNotification {
-    duration: number; // 分単位
+    duration: number; // duration in minutes
     message: string;
     type: string;
     enabled: boolean;
@@ -22,9 +22,9 @@ export class TimerManager {
     }
 
     /**
-     * タイマーを開始する
-     * @param notification 通知設定
-     * @param callback 通知を表示するコールバック
+     * Start a timer for the provided notification
+     * @param notification notification configuration
+     * @param callback callback to invoke when the timer fires
      */
     public startTimer(notification: TimeBasedNotification, callback: () => void): void {
         if (this.disposed) {
@@ -69,8 +69,8 @@ export class TimerManager {
     }
 
     /**
-     * 特定のタイマーを停止する
-     * @param type 通知タイプ
+     * Stop a specific timer
+     * @param type timer type
      */
     public stopTimer(type: string): void {
         const timerState = this.timers.get(type);
@@ -82,7 +82,7 @@ export class TimerManager {
     }
 
     /**
-     * すべてのタイマーをクリアする
+     * Clear all timers
      */
     public clearAllTimers(): void {
         console.log('[code-mantra] Clearing all timers');
@@ -94,7 +94,7 @@ export class TimerManager {
     }
 
     /**
-     * タイマーをリセットする（新しい開始時刻から再スタート）
+     * Reset timers (restart from a new start time)
      */
     public resetTimers(): void {
         console.log('[code-mantra] Resetting all timers');
@@ -114,21 +114,21 @@ export class TimerManager {
     }
 
     /**
-     * アクティブなタイマーの数を取得
+     * Get the number of active timers
      */
     public getActiveTimerCount(): number {
         return this.timers.size;
     }
 
     /**
-     * 特定のタイマーがアクティブかどうかを確認
+     * Check whether a specific timer is active
      */
     public isTimerActive(type: string): boolean {
         return this.timers.has(type);
     }
 
     /**
-     * リソースをクリーンアップして破棄
+     * Clean up resources and dispose
      */
     public dispose(): void {
         if (this.disposed) {

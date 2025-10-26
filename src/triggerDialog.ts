@@ -5,13 +5,13 @@ export class TriggerDialog {
     static async showAddDialog(): Promise<TriggerRule | undefined> {
         // トリガータイプを選択
         const triggerType = await vscode.window.showQuickPick([
-            { label: '💾 保存時 (onSave)', value: 'onSave' as const, description: 'ファイル保存時に通知を表示' },
-            { label: '✏️ 編集時 (onEdit)', value: 'onEdit' as const, description: '編集後に遅延して通知を表示' },
-            { label: '📂 開く時 (onOpen)', value: 'onOpen' as const, description: 'ファイルを開いた時に通知を表示' },
-            { label: '🎯 フォーカス時 (onFocus)', value: 'onFocus' as const, description: 'エディタがフォーカスされた時に通知を表示' }
+            { label: '💾 On Save (onSave)', value: 'onSave' as const, description: 'Show notification when a file is saved' },
+            { label: '✏️ On Edit (onEdit)', value: 'onEdit' as const, description: 'Show notification after editing with debounce' },
+            { label: '📂 On Open (onOpen)', value: 'onOpen' as const, description: 'Show notification when a file is opened' },
+            { label: '🎯 On Focus (onFocus)', value: 'onFocus' as const, description: 'Show notification when editor gains focus' }
         ], {
-            placeHolder: 'トリガータイプを選択してください',
-            title: '新しいトリガーを追加'
+            placeHolder: 'Select a trigger type',
+            title: 'Add New Trigger'
         });
 
         if (!triggerType) {
@@ -20,11 +20,11 @@ export class TriggerDialog {
 
         // メッセージを入力
         const message = await vscode.window.showInputBox({
-            prompt: '通知メッセージを入力してください',
-            placeHolder: '例: ETC? (Easier To Change?)',
+            prompt: 'Enter notification message',
+            placeHolder: 'e.g. ETC? (Easier To Change?)',
             validateInput: (value) => {
                 if (!value || value.trim().length === 0) {
-                    return 'メッセージを入力してください';
+                    return 'Please enter a message';
                 }
                 return null;
             }
@@ -36,8 +36,8 @@ export class TriggerDialog {
 
         // ファイルパターンを入力
         const filePattern = await vscode.window.showInputBox({
-            prompt: 'ファイルパターンを入力してください (オプション)',
-            placeHolder: '例: **/*.{ts,js,tsx,jsx} または 空白で全てのファイル対象',
+            prompt: 'Enter a file glob pattern (optional)',
+            placeHolder: 'e.g. **/*.{ts,js,tsx,jsx} or leave blank for all files',
             value: ''
         });
 
@@ -61,8 +61,8 @@ export class TriggerDialog {
         const currentTriggerIndex = triggerOptions.findIndex(opt => opt.value === existingRule.trigger);
 
         const triggerType = await vscode.window.showQuickPick(triggerOptions, {
-            placeHolder: 'トリガータイプを選択してください',
-            title: 'トリガーを編集'
+            placeHolder: 'Select a trigger type',
+            title: 'Edit Trigger'
         });
 
         if (!triggerType) {
@@ -71,12 +71,12 @@ export class TriggerDialog {
 
         // メッセージを編集
         const message = await vscode.window.showInputBox({
-            prompt: '通知メッセージを編集してください',
-            placeHolder: '例: ETC? (Easier To Change?)',
+            prompt: 'Edit notification message',
+            placeHolder: 'e.g. ETC? (Easier To Change?)',
             value: existingRule.message,
             validateInput: (value) => {
                 if (!value || value.trim().length === 0) {
-                    return 'メッセージを入力してください';
+                    return 'Please enter a message';
                 }
                 return null;
             }
@@ -88,8 +88,8 @@ export class TriggerDialog {
 
         // ファイルパターンを編集
         const filePattern = await vscode.window.showInputBox({
-            prompt: 'ファイルパターンを編集してください (オプション)',
-            placeHolder: '例: **/*.{ts,js,tsx,jsx} または 空白で全てのファイル対象',
+            prompt: 'Edit file glob pattern (optional)',
+            placeHolder: 'e.g. **/*.{ts,js,tsx,jsx} or leave blank for all files',
             value: existingRule.filePattern || ''
         });
 
@@ -103,12 +103,12 @@ export class TriggerDialog {
 
     static async confirmDelete(message: string): Promise<boolean> {
         const result = await vscode.window.showWarningMessage(
-            `トリガー「${message}」を削除してもよろしいですか?`,
+            `Are you sure you want to delete trigger "${message}"?`,
             { modal: true },
-            '削除',
-            'キャンセル'
+            'Delete',
+            'Cancel'
         );
 
-        return result === '削除';
+        return result === 'Delete';
     }
 }
