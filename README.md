@@ -1,5 +1,7 @@
 # Code Mantra
 
+[English](./README.md) | [日本語](./README.ja.md)
+
 Remind yourself of programming principles with customizable notifications in VS Code.
 
 ## Features
@@ -24,7 +26,22 @@ When you save a file, Code Mantra will randomly show one of the configured princ
 
 ## Configuration
 
-Open VS Code settings (`Ctrl+,` or `Cmd+,`) and search for "Code Mantra".
+### Using VS Code Settings UI (Recommended)
+
+1. Open VS Code Settings:
+   - **Windows/Linux**: `Ctrl+,` or File → Preferences → Settings
+   - **macOS**: `Cmd+,` or Code → Settings → Settings
+2. Search for "Code Mantra" in the search box
+3. Configure options using checkboxes, text inputs, and dropdowns:
+   - **Enable/Disable**: Toggle the main switch
+   - **Triggers**: Use checkboxes to enable/disable each trigger type
+   - **Edit Delay**: Adjust the delay slider (1000-10000ms)
+   - **File Types**: Add/remove language IDs from the list
+   - **Exclude Patterns**: Add glob patterns to exclude files
+
+### Using settings.json (Advanced)
+
+Alternatively, you can edit `settings.json` directly:
 
 ### Enable/Disable
 
