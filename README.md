@@ -16,7 +16,7 @@ Code Mantra helps you build better coding habits by showing timely reminders of 
 
 ## ✨ Features
 
-### � Multiple Trigger Types
+### 🔔 Multiple Trigger Types
 
 Show notifications when you need them:
 
@@ -40,6 +40,15 @@ Stay healthy and productive with periodic reminders:
 - **Glob Pattern Exclusions** - Easily ignore node_modules, dist, and other directories
 - **Custom File Patterns** - Target specific file types with your own rules
 - **Rate Limiting** - Automatic spam prevention (minimum 3-second intervals)
+
+### 🧭 Trigger Management Panel
+
+Manage every reminder visually from the dedicated **Code Mantra** activity bar panel:
+
+- **Tree View Overview** - See all active triggers grouped by type at a glance
+- **Inline Actions** - Edit, enable/disable, reorder, or delete without leaving the panel
+- **Quick Add** - Use the ➕ button or command palette (`Code Mantra: Add Trigger`) to create new rules with guided validation
+- **One-Click Refresh** - Keep the list in sync after manual `settings.json` edits using the 🔄 action
 
 ### 📚 Built-in Wisdom
 
@@ -67,6 +76,14 @@ To enable additional features:
 - ✏️ **Enable edit triggers** for real-time coding reminders
 - 🎨 **Customize messages** to match your coding philosophy
 
+## 🙌 Join the Community
+
+- ⭐ **Star the repo** to help more developers discover Code Mantra
+- 🐞 **Report issues** with reproduction steps so we can fix problems fast
+- 💡 **Request features** or share workflows that would make the extension better
+- 🤝 **Open pull requests**—we love collaborating on improvements
+- 📝 **Leave a Marketplace review** once Code Mantra boosts your habits
+
 ## Usage
 
 ### Default Behavior
@@ -75,6 +92,17 @@ When you save a file, Code Mantra will randomly show one of the configured princ
 
 - "ETC? (Easier To Change?)" - Is your code easy to change?
 - "DRY? (Don't Repeat Yourself)" - Are you avoiding repetition?
+
+### Manage Triggers Visually
+
+1. Open the **Code Mantra** item in the VS Code activity bar.
+2. Use the **Triggers** tree view to see every configured rule and timer.
+3. Hover over a trigger to reveal inline actions for edit, toggle, move, or delete.
+4. Click the **Add Trigger** button to launch guided dialogs with input validation.
+
+### Run a Test Notification
+
+Open the Command Palette and run `Code Mantra: Test Notification` to preview how toasts will appear in your editor.
 
 ## Configuration
 
@@ -261,6 +289,24 @@ Code Mantra can show notifications at regular time intervals to remind you to ta
 2. Go to Extensions (`Ctrl+Shift+X` or `Cmd+Shift+X`)
 3. Search for "Code Mantra"
 4. Click Install
+
+## 🛠 Troubleshooting
+
+1. **Reset your settings**
+
+- Open `Preferences: Open Settings (JSON)` from the Command Palette
+- Remove any `codeMantra.*` entries to return to the defaults
+- Save the file and reload VS Code (`Developer: Reload Window`)
+
+2. **Reinstall the extension**
+
+- Uninstall Code Mantra from the Extensions view
+- Close all VS Code windows, then reinstall from the Marketplace listing
+
+3. **Still stuck? Open an issue**
+
+- Create a new ticket at [github.com/is0692vs/code-mantra/issues](https://github.com/is0692vs/code-mantra/issues)
+- Include your VS Code version, Code Mantra version, relevant `settings.json` snippet, and any log output
 
 ## Development
 
