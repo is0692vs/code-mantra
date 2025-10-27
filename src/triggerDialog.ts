@@ -83,9 +83,9 @@ export class TriggerDialog {
         // For timer triggers, ask for duration and type
         if (triggerType.value === 'onTimer') {
             const timerTypeChoice = await vscode.window.showQuickPick([
+                { label: '⚙️ Custom Duration', value: 'custom' as const, duration: 0 },
                 { label: '🍅 Pomodoro (25 min)', value: 'pomodoro' as const, duration: 25 },
-                { label: '💼 Work Break (50 min)', value: 'workBreak' as const, duration: 50 },
-                { label: '⚙️ Custom Duration', value: 'custom' as const, duration: 0 }
+                { label: '💼 Work Break (50 min)', value: 'workBreak' as const, duration: 50 }
             ], {
                 placeHolder: 'Select timer type',
                 title: 'Timer Type'
