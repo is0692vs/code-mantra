@@ -2,7 +2,68 @@ import * as vscode from 'vscode';
 import { TriggerRule } from './triggerTreeView';
 
 export class TriggerDialog {
+    /**
+     * Validate duration input (1-120 minutes, digits only)
+     */
+    private static validateDurationInput(value: string): string | null {
+        // Check if input contains only digits (empty string will fail this test)
+        if (!/^\d+$/.test(value.trim())) {
+            return 'Invalid input. Please enter only numbers (no letters or special characters).';
+        }
+        const num = parseInt(value.trim());
+        if (isNaN(num) || num < 1 || num > 120) {
+            return 'Duration must be between 1 and 120 minutes.';
+        }
+        return null;
+    }
+
+    /**
+     * Validate message input (non-empty)
+     */
+    private static validateMessageInput(value: string): string | null {
+        if (!value || value.trim().length === 0) {
+            return 'Message cannot be empty. Please enter a notification message.';
+        }
+        return null;
+    }
+
+    /**
+     * Show input box with validation and retry on invalid input
+     */
+    private static async showInputBoxWithRetry(
+        options: vscode.InputBoxOptions,
+        validator: (value: string) => string | null
+    ): Promise<string | undefined> {
+        while (true) {
+            const input = await vscode.window.showInputBox(options);
+
+            if (input === undefined) {
+                // User cancelled
+                return undefined;
+            }
+
+            const errorMessage = validator(input);
+            if (errorMessage === null) {
+                // Valid input
+                return input;
+            }
+
+            // Show error message and retry
+            const retry = await vscode.window.showWarningMessage(
+                errorMessage,
+                'Retry',
+                'Cancel'
+            );
+
+            if (retry !== 'Retry') {
+                return undefined;
+            }
+            // Loop continues to show input box again
+        }
+    }
+
     static async showAddDialog(): Promise<TriggerRule | undefined> {
+        console.log('[code-mantra] TriggerDialog.showAddDialog() called');
         // Select trigger type
         const triggerType = await vscode.window.showQuickPick([
             { label: '💾 On Save (onSave)', value: 'onSave' as const, description: 'Show notification when a file is saved' },
@@ -36,36 +97,31 @@ export class TriggerDialog {
 
             let duration = timerTypeChoice.duration;
             if (timerTypeChoice.value === 'custom') {
-                const durationInput = await vscode.window.showInputBox({
-                    prompt: 'Enter duration in minutes (1-120)',
-                    placeHolder: 'e.g. 25',
-                    validateInput: (value) => {
-                        const num = parseInt(value);
-                        if (isNaN(num) || num < 1 || num > 120) {
-                            return 'Please enter a number between 1 and 120';
-                        }
-                        return null;
-                    }
-                });
+                const durationInput = await this.showInputBoxWithRetry(
+                    {
+                        prompt: 'Enter duration in minutes (1-120)',
+                        placeHolder: 'e.g. 25'
+                    },
+                    this.validateDurationInput
+                );
 
                 if (!durationInput) {
                     return undefined;
                 }
-                duration = parseInt(durationInput);
+                duration = parseInt(durationInput.trim());
             }
 
-            const message = await vscode.window.showInputBox({
-                prompt: 'Enter notification message',
-                placeHolder: 'e.g. Time to take a break!',
-                value: timerTypeChoice.value === 'pomodoro' ? '🍅 Pomodoro complete! Take a short break.' :
-                    timerTypeChoice.value === 'workBreak' ? '💡 Time to take a break! Step away from your screen.' : '',
-                validateInput: (value) => {
-                    if (!value || value.trim().length === 0) {
-                        return 'Please enter a message';
-                    }
-                    return null;
-                }
-            });
+            const defaultMessage = timerTypeChoice.value === 'pomodoro' ? '🍅 Pomodoro complete! Take a short break.' :
+                timerTypeChoice.value === 'workBreak' ? '💡 Time to take a break! Step away from your screen.' : '';
+
+            const message = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Enter notification message',
+                    placeHolder: 'e.g. Time to take a break!',
+                    value: defaultMessage
+                },
+                this.validateMessageInput
+            );
 
             if (!message) {
                 return undefined;
@@ -82,16 +138,13 @@ export class TriggerDialog {
 
         // For file-based triggers
         // Enter message
-        const message = await vscode.window.showInputBox({
-            prompt: 'Enter notification message',
-            placeHolder: 'e.g. ETC? (Easier To Change?)',
-            validateInput: (value) => {
-                if (!value || value.trim().length === 0) {
-                    return 'Please enter a message';
-                }
-                return null;
-            }
-        });
+        const message = await this.showInputBoxWithRetry(
+            {
+                prompt: 'Enter notification message',
+                placeHolder: 'e.g. ETC? (Easier To Change?)'
+            },
+            this.validateMessageInput
+        );
 
         if (!message) {
             return undefined;
@@ -134,36 +187,29 @@ export class TriggerDialog {
         // For timer triggers, edit duration and type
         if (triggerType.value === 'onTimer') {
             const currentDuration = existingRule.duration || 25;
-            const durationInput = await vscode.window.showInputBox({
-                prompt: 'Edit duration in minutes (1-120)',
-                placeHolder: 'e.g. 25',
-                value: currentDuration.toString(),
-                validateInput: (value) => {
-                    const num = parseInt(value);
-                    if (isNaN(num) || num < 1 || num > 120) {
-                        return 'Please enter a number between 1 and 120';
-                    }
-                    return null;
-                }
-            });
+            const durationInput = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Edit duration in minutes (1-120)',
+                    placeHolder: 'e.g. 25',
+                    value: currentDuration.toString()
+                },
+                this.validateDurationInput
+            );
 
             if (!durationInput) {
                 return undefined;
             }
 
-            const duration = parseInt(durationInput);
+            const duration = parseInt(durationInput.trim());
 
-            const message = await vscode.window.showInputBox({
-                prompt: 'Edit notification message',
-                placeHolder: 'e.g. Time to take a break!',
-                value: existingRule.message,
-                validateInput: (value) => {
-                    if (!value || value.trim().length === 0) {
-                        return 'Please enter a message';
-                    }
-                    return null;
-                }
-            });
+            const message = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Edit notification message',
+                    placeHolder: 'e.g. Time to take a break!',
+                    value: existingRule.message
+                },
+                this.validateMessageInput
+            );
 
             if (!message) {
                 return undefined;
@@ -180,17 +226,14 @@ export class TriggerDialog {
 
         // For file-based triggers
         // Edit message
-        const message = await vscode.window.showInputBox({
-            prompt: 'Edit notification message',
-            placeHolder: 'e.g. ETC? (Easier To Change?)',
-            value: existingRule.message,
-            validateInput: (value) => {
-                if (!value || value.trim().length === 0) {
-                    return 'Please enter a message';
-                }
-                return null;
-            }
-        });
+        const message = await this.showInputBoxWithRetry(
+            {
+                prompt: 'Edit notification message',
+                placeHolder: 'e.g. ETC? (Easier To Change?)',
+                value: existingRule.message
+            },
+            this.validateMessageInput
+        );
 
         if (!message) {
             return undefined;

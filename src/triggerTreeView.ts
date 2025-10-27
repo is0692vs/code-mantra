@@ -83,16 +83,20 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
     readonly onDidChangeTreeData: vscode.Event<TriggerTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
     constructor(private context: vscode.ExtensionContext) {
+        console.log('[code-mantra] TriggerTreeDataProvider constructor called');
         // Refresh TreeView when configuration changes
         vscode.workspace.onDidChangeConfiguration((event) => {
             if (event.affectsConfiguration('codeMantra.rules') ||
                 event.affectsConfiguration('codeMantra.triggers')) {
+                console.log('[code-mantra] Configuration changed, refreshing TreeView');
                 this.refresh();
             }
         });
+        console.log('[code-mantra] TriggerTreeDataProvider initialized');
     }
 
     refresh(): void {
+        console.log('[code-mantra] TreeView refresh() called - firing onDidChangeTreeData event');
         this._onDidChangeTreeData.fire();
     }
 
@@ -108,24 +112,39 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
         const config = vscode.workspace.getConfiguration('codeMantra');
         const rules = config.get<TriggerRule[]>('rules', []);
 
+        console.log('[code-mantra] TreeView getChildren called');
+        console.log('[code-mantra] Found rules:', rules.length);
+        console.log('[code-mantra] Rules detail:', JSON.stringify(rules, null, 2));
+
         if (rules.length === 0) {
+            console.log('[code-mantra] No rules found, returning empty array');
             return [];
         }
 
         // Show all triggers regardless of enabled state (checkbox controls visibility of state)
-        return rules.map((rule, index) =>
-            new TriggerTreeItem(rule, index, vscode.TreeItemCollapsibleState.None)
-        );
+        const items = rules.map((rule, index) => {
+            console.log(`[code-mantra] Creating TreeItem for rule ${index}:`, rule.message);
+            return new TriggerTreeItem(rule, index, vscode.TreeItemCollapsibleState.None);
+        });
+
+        console.log('[code-mantra] Returning', items.length, 'tree items');
+        return items;
     }
 
     async addTrigger(trigger: TriggerRule): Promise<void> {
+        console.log('[code-mantra] addTrigger called with:', JSON.stringify(trigger, null, 2));
         const config = vscode.workspace.getConfiguration('codeMantra');
         const rules = config.get<TriggerRule[]>('rules', []);
 
+        console.log('[code-mantra] Current rules before add:', rules.length);
         rules.push(trigger);
+        console.log('[code-mantra] Rules after push:', rules.length);
 
         await config.update('rules', rules, vscode.ConfigurationTarget.Global);
+        console.log('[code-mantra] Configuration updated');
+
         this.refresh();
+        console.log('[code-mantra] TreeView refreshed');
 
         vscode.window.showInformationMessage(`Added trigger "${trigger.message}"`);
     }

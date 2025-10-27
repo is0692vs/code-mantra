@@ -30,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 	initializeTimers();
 
 	// Initialize the TreeView
+	console.log('[code-mantra] Initializing TreeView...');
 	const triggerTreeDataProvider = new TriggerTreeDataProvider(context);
 	const treeView = vscode.window.createTreeView('codeMantraTriggers', {
 		treeDataProvider: triggerTreeDataProvider,
@@ -37,6 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 		canSelectMany: false
 	});
 	context.subscriptions.push(treeView);
+	console.log('[code-mantra] TreeView registered successfully');
 
 	// Handle checkbox state changes
 	treeView.onDidChangeCheckboxState(async (e) => {
