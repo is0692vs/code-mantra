@@ -3,6 +3,31 @@ import { TriggerRule } from './triggerTreeView';
 
 export class TriggerDialog {
     /**
+     * Validate duration input (1-120 minutes, digits only)
+     */
+    private static validateDurationInput(value: string): string | null {
+        // Check if input contains only digits (empty string will fail this test)
+        if (!/^\d+$/.test(value.trim())) {
+            return 'Invalid input. Please enter only numbers (no letters or special characters).';
+        }
+        const num = parseInt(value.trim());
+        if (isNaN(num) || num < 1 || num > 120) {
+            return 'Duration must be between 1 and 120 minutes.';
+        }
+        return null;
+    }
+
+    /**
+     * Validate message input (non-empty)
+     */
+    private static validateMessageInput(value: string): string | null {
+        if (!value || value.trim().length === 0) {
+            return 'Message cannot be empty. Please enter a notification message.';
+        }
+        return null;
+    }
+
+    /**
      * Show input box with validation and retry on invalid input
      */
     private static async showInputBoxWithRetry(
@@ -11,7 +36,7 @@ export class TriggerDialog {
     ): Promise<string | undefined> {
         while (true) {
             const input = await vscode.window.showInputBox(options);
-            
+
             if (input === undefined) {
                 // User cancelled
                 return undefined;
@@ -77,21 +102,7 @@ export class TriggerDialog {
                         prompt: 'Enter duration in minutes (1-120)',
                         placeHolder: 'e.g. 25'
                     },
-                    (value) => {
-                        // Check if input is empty
-                        if (!value || value.trim().length === 0) {
-                            return 'Duration cannot be empty. Please enter a number between 1 and 120.';
-                        }
-                        // Check if input contains only digits
-                        if (!/^\d+$/.test(value.trim())) {
-                            return 'Invalid input. Please enter only numbers (no letters or special characters).';
-                        }
-                        const num = parseInt(value.trim());
-                        if (isNaN(num) || num < 1 || num > 120) {
-                            return 'Duration must be between 1 and 120 minutes.';
-                        }
-                        return null;
-                    }
+                    this.validateDurationInput
                 );
 
                 if (!durationInput) {
@@ -102,19 +113,14 @@ export class TriggerDialog {
 
             const defaultMessage = timerTypeChoice.value === 'pomodoro' ? '🍅 Pomodoro complete! Take a short break.' :
                 timerTypeChoice.value === 'workBreak' ? '💡 Time to take a break! Step away from your screen.' : '';
-            
+
             const message = await this.showInputBoxWithRetry(
                 {
                     prompt: 'Enter notification message',
                     placeHolder: 'e.g. Time to take a break!',
                     value: defaultMessage
                 },
-                (value) => {
-                    if (!value || value.trim().length === 0) {
-                        return 'Message cannot be empty. Please enter a notification message.';
-                    }
-                    return null;
-                }
+                this.validateMessageInput
             );
 
             if (!message) {
@@ -137,12 +143,7 @@ export class TriggerDialog {
                 prompt: 'Enter notification message',
                 placeHolder: 'e.g. ETC? (Easier To Change?)'
             },
-            (value) => {
-                if (!value || value.trim().length === 0) {
-                    return 'Message cannot be empty. Please enter a notification message.';
-                }
-                return null;
-            }
+            this.validateMessageInput
         );
 
         if (!message) {
@@ -192,21 +193,7 @@ export class TriggerDialog {
                     placeHolder: 'e.g. 25',
                     value: currentDuration.toString()
                 },
-                (value) => {
-                    // Check if input is empty
-                    if (!value || value.trim().length === 0) {
-                        return 'Duration cannot be empty. Please enter a number between 1 and 120.';
-                    }
-                    // Check if input contains only digits
-                    if (!/^\d+$/.test(value.trim())) {
-                        return 'Invalid input. Please enter only numbers (no letters or special characters).';
-                    }
-                    const num = parseInt(value.trim());
-                    if (isNaN(num) || num < 1 || num > 120) {
-                        return 'Duration must be between 1 and 120 minutes.';
-                    }
-                    return null;
-                }
+                this.validateDurationInput
             );
 
             if (!durationInput) {
@@ -221,12 +208,7 @@ export class TriggerDialog {
                     placeHolder: 'e.g. Time to take a break!',
                     value: existingRule.message
                 },
-                (value) => {
-                    if (!value || value.trim().length === 0) {
-                        return 'Message cannot be empty. Please enter a notification message.';
-                    }
-                    return null;
-                }
+                this.validateMessageInput
             );
 
             if (!message) {
@@ -250,12 +232,7 @@ export class TriggerDialog {
                 placeHolder: 'e.g. ETC? (Easier To Change?)',
                 value: existingRule.message
             },
-            (value) => {
-                if (!value || value.trim().length === 0) {
-                    return 'Message cannot be empty. Please enter a notification message.';
-                }
-                return null;
-            }
+            this.validateMessageInput
         );
 
         if (!message) {
