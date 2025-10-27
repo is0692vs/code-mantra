@@ -82,12 +82,12 @@
       {
         "command": "code-mantra.deleteTrigger",
         "title": "Delete Trigger",
-        "icon": "$(trash)"
+        "icon": "$(circle-slash)"
       },
       {
         "command": "code-mantra.toggleTrigger",
         "title": "Toggle Trigger Enabled",
-        "icon": "$(circle-slash)"
+        "icon": "$(check)"
       },
       {
         "command": "code-mantra.moveTriggerUp",
@@ -125,12 +125,12 @@
           "group": "inline@1"
         },
         {
-          "command": "code-mantra.toggleTrigger",
+          "command": "code-mantra.deleteTrigger",
           "when": "view == codeMantraTriggers && viewItem == triggerRule",
           "group": "inline@2"
         },
         {
-          "command": "code-mantra.deleteTrigger",
+          "command": "code-mantra.toggleTrigger",
           "when": "view == codeMantraTriggers && viewItem == triggerRule",
           "group": "actions@1"
         },
