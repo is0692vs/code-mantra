@@ -107,6 +107,7 @@ export class TriggerDialog {
             { label: '✏️ On Edit (onEdit)', value: 'onEdit' as const, description: 'Show notification after editing with debounce' },
             { label: '📂 On Open (onOpen)', value: 'onOpen' as const, description: 'Show notification when a file is opened' },
             { label: '🎯 On Focus (onFocus)', value: 'onFocus' as const, description: 'Show notification when editor gains focus' },
+            { label: '🚀 Workspace Open (onWorkspaceOpen)', value: 'onWorkspaceOpen' as const, description: 'Show reminder when VS Code starts' },
             { label: '⏰ Timer (onTimer)', value: 'onTimer' as const, description: 'Show notification at regular time intervals' },
             { label: '➕ Create (onCreate)', value: 'onCreate' as const, description: 'Show notification when a new file is created' },
             { label: '🗑️ Delete (onDelete)', value: 'onDelete' as const, description: 'Show notification when a file is deleted' },
@@ -119,6 +120,27 @@ export class TriggerDialog {
 
         if (!triggerType) {
             return undefined;
+        }
+
+        // For onWorkspaceOpen, only ask for message
+        if (triggerType.value === 'onWorkspaceOpen') {
+            const message = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Enter notification message',
+                    placeHolder: 'e.g. Remember to take a break!'
+                },
+                this.validateMessageInput
+            );
+
+            if (!message) {
+                return undefined;
+            }
+
+            return {
+                trigger: 'onWorkspaceOpen',
+                message: message.trim(),
+                enabled: true
+            };
         }
 
         // For timer triggers, ask for duration and type
@@ -259,6 +281,7 @@ export class TriggerDialog {
             { label: '✏️ On Edit (onEdit)', value: 'onEdit' as const, description: 'Show notification after editing with debounce' },
             { label: '📂 On Open (onOpen)', value: 'onOpen' as const, description: 'Show notification when a file is opened' },
             { label: '🎯 On Focus (onFocus)', value: 'onFocus' as const, description: 'Show notification when editor gains focus' },
+            { label: '🚀 Workspace Open (onWorkspaceOpen)', value: 'onWorkspaceOpen' as const, description: 'Show reminder when VS Code starts' },
             { label: '⏰ Timer (onTimer)', value: 'onTimer' as const, description: 'Show notification at regular time intervals' },
             { label: '➕ Create (onCreate)', value: 'onCreate' as const, description: 'Show notification when a new file is created' },
             { label: '🗑️ Delete (onDelete)', value: 'onDelete' as const, description: 'Show notification when a file is deleted' },
@@ -273,6 +296,28 @@ export class TriggerDialog {
 
         if (!triggerType) {
             return undefined;
+        }
+
+        // For onWorkspaceOpen, only edit message
+        if (triggerType.value === 'onWorkspaceOpen') {
+            const message = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Edit notification message',
+                    placeHolder: 'e.g. Remember to take a break!',
+                    value: existingRule.message
+                },
+                this.validateMessageInput
+            );
+
+            if (!message) {
+                return undefined;
+            }
+
+            return {
+                trigger: 'onWorkspaceOpen',
+                message: message.trim(),
+                enabled: existingRule.enabled
+            };
         }
 
         // For timer triggers, edit duration and type

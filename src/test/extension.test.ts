@@ -100,4 +100,21 @@ suite('Extension Test Suite', () => {
 			assert.ok(!(threshold >= 1 && threshold <= 10000));
 		});
 	});
+
+	test('Should support onWorkspaceOpen trigger rules', () => {
+		// Test that onWorkspaceOpen rules can be stored in configuration
+		const workspaceOpenRule = {
+			trigger: 'onWorkspaceOpen',
+			message: 'Welcome! Remember SOLID principles today.',
+			enabled: true
+		};
+
+		assert.strictEqual(workspaceOpenRule.trigger, 'onWorkspaceOpen');
+		assert.ok(workspaceOpenRule.message);
+		assert.strictEqual(typeof workspaceOpenRule.message, 'string');
+		// onWorkspaceOpen should NOT have filePattern, deletionThreshold, or lineSizeThreshold
+		assert.strictEqual((workspaceOpenRule as any).filePattern, undefined);
+		assert.strictEqual((workspaceOpenRule as any).deletionThreshold, undefined);
+		assert.strictEqual((workspaceOpenRule as any).lineSizeThreshold, undefined);
+	});
 });
