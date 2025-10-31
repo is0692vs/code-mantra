@@ -1,5 +1,3 @@
-import * as vscode from 'vscode';
-
 /**
  * Manages notification suppression to prevent duplicate or unwanted notifications
  * from multiple triggers firing simultaneously.
