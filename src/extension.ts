@@ -153,6 +153,40 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	// Register onCreate trigger
+	const onCreateDisposable = vscode.workspace.onDidCreateFiles((event) => {
+		console.log('[code-mantra] onDidCreateFiles event triggered');
+		const rules = getRules().filter(rule => rule.trigger === 'onCreate' && rule.enabled !== false);
+
+		for (const file of event.files) {
+			console.log(`[code-mantra] File created: ${file.fsPath}`);
+			for (const rule of rules) {
+				if (shouldTriggerForFile(file.fsPath, rule.filePattern)) {
+					showNotification(rule.message);
+				}
+			}
+		}
+	});
+	context.subscriptions.push(onCreateDisposable);
+	console.log('[code-mantra] onCreate trigger registered');
+
+	// Register onDelete trigger
+	const onDeleteDisposable = vscode.workspace.onDidDeleteFiles((event) => {
+		console.log('[code-mantra] onDidDeleteFiles event triggered');
+		const rules = getRules().filter(rule => rule.trigger === 'onDelete' && rule.enabled !== false);
+
+		for (const file of event.files) {
+			console.log(`[code-mantra] File deleted: ${file.fsPath}`);
+			for (const rule of rules) {
+				if (shouldTriggerForFile(file.fsPath, rule.filePattern)) {
+					showNotification(rule.message);
+				}
+			}
+		}
+	});
+	context.subscriptions.push(onDeleteDisposable);
+	console.log('[code-mantra] onDelete trigger registered');
+
 	// Register timer reset events
 	const config = vscode.workspace.getConfiguration('codeMantra');
 	const timeBasedEnabled = config.get<boolean>('timeBasedNotifications.enabled', true);
@@ -361,6 +395,15 @@ function matchesGlobPattern(filePath: string, pattern: string): boolean {
 function getRules(): Array<{ trigger: string, message: string, filePattern?: string, enabled?: boolean }> {
 	const config = vscode.workspace.getConfiguration('codeMantra');
 	return config.get<Array<{ trigger: string, message: string, filePattern?: string, enabled?: boolean }>>('rules', []);
+}
+
+function shouldTriggerForFile(filePath: string, filePattern?: string): boolean {
+	// If no pattern specified, trigger for all files
+	if (!filePattern) {
+		return true;
+	}
+
+	return matchesGlobPattern(filePath, filePattern);
 }
 
 function showNotification(message: string): void {

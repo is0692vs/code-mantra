@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 export interface TriggerRule {
-    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onTimer';
+    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onTimer' | 'onCreate' | 'onDelete';
     message: string;
     filePattern?: string;
     enabled?: boolean;
@@ -56,6 +56,8 @@ export class TriggerTreeItem extends vscode.TreeItem {
             case 'onOpen': return '📂 On Open';
             case 'onFocus': return '🎯 On Focus';
             case 'onTimer': return '⏰ Timer';
+            case 'onCreate': return '➕ On Create';
+            case 'onDelete': return '🗑️ On Delete';
             default: return this.rule.trigger;
         }
     }
@@ -72,6 +74,10 @@ export class TriggerTreeItem extends vscode.TreeItem {
                 return new vscode.ThemeIcon('target', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.purple' : 'disabledForeground'));
             case 'onTimer':
                 return new vscode.ThemeIcon('watch', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.orange' : 'disabledForeground'));
+            case 'onCreate':
+                return new vscode.ThemeIcon('add', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.green' : 'disabledForeground'));
+            case 'onDelete':
+                return new vscode.ThemeIcon('trash', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.red' : 'disabledForeground'));
             default:
                 return new vscode.ThemeIcon('bell');
         }

@@ -157,12 +157,14 @@ Configure when notifications should appear:
 
 **Available Triggers:**
 
-| Trigger   | When it fires                 | Recommended use                                               |
-| --------- | ----------------------------- | ------------------------------------------------------------- |
-| `onSave`  | After saving a file           | Best default option before committing changes.                |
-| `onEdit`  | While editing (after a delay) | Gentle nudges without interrupting flow thanks to debouncing. |
-| `onOpen`  | As soon as a file opens       | Kick off work with a reminder when you start editing.         |
-| `onFocus` | When the editor gains focus   | Helpful when switching between files or windows.              |
+| Trigger    | When it fires                 | Recommended use                                               |
+| ---------- | ----------------------------- | ------------------------------------------------------------- |
+| `onSave`   | After saving a file           | Best default option before committing changes.                |
+| `onEdit`   | While editing (after a delay) | Gentle nudges without interrupting flow thanks to debouncing. |
+| `onOpen`   | As soon as a file opens       | Kick off work with a reminder when you start editing.         |
+| `onFocus`  | When the editor gains focus   | Helpful when switching between files or windows.              |
+| `onCreate` | When a new file is created    | Ask clarifying questions about file naming and structure.     |
+| `onDelete` | When a file is deleted        | Remind about dependencies and related cleanup tasks.          |
 
 ### File Types
 
@@ -219,19 +221,24 @@ Add your own rules in `settings.json`:
       "filePattern": "**/*.{ts,js,tsx,jsx}"
     },
     {
-      "trigger": "onSave",
-      "message": "Single Responsibility?",
+      "trigger": "onCreate",
+      "message": "Is the file name clear and descriptive?",
       "filePattern": "**/*.{ts,js}"
+    },
+    {
+      "trigger": "onDelete",
+      "message": "Have you checked related dependencies?",
+      "filePattern": "**/*"
     }
   ]
 }
 ```
 
-| Property      | Purpose                                                 | Notes                                                    |
-| ------------- | ------------------------------------------------------- | -------------------------------------------------------- |
-| `trigger`     | Matches one of `onSave`, `onEdit`, `onOpen`, `onFocus`. | Aligns with the triggers table above.                    |
-| `message`     | Text shown in the notification toast.                   | Keep it short and actionable.                            |
-| `filePattern` | Optional glob to scope the rule.                        | Example: `**/*.md` (defaults to all files when omitted). |
+| Property      | Purpose                                                                                   | Notes                                                    |
+| ------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `trigger`     | Matches one of `onSave`, `onEdit`, `onOpen`, `onFocus`, `onCreate`, `onDelete`, `onTimer` | Determines when the notification shows.                  |
+| `message`     | Text shown in the notification toast.                                                     | Keep it short and actionable.                            |
+| `filePattern` | Optional glob to scope the rule.                                                          | Example: `**/*.md` (defaults to all files when omitted). |
 
 ### Time-Based Notifications
 
