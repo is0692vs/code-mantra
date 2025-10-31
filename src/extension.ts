@@ -281,15 +281,7 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('[code-mantra] File close handler registered');
 
 	// Handle onWorkspaceOpen trigger (shows on activation)
-	const workspaceOpenRules = getRules().filter(
-		rule => rule.trigger === 'onWorkspaceOpen' && rule.enabled !== false
-	);
-	if (workspaceOpenRules.length > 0) {
-		console.log(`[code-mantra] Executing ${workspaceOpenRules.length} onWorkspaceOpen rules`);
-		workspaceOpenRules.forEach(rule => {
-			showNotification(rule.message);
-		});
-	}
+	triggerManager.handleWorkspaceOpen();
 
 	// Register timer reset events
 	const config = vscode.workspace.getConfiguration('codeMantra');
