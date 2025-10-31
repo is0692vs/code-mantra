@@ -24,6 +24,7 @@ Show notifications when you need them:
 - **On Edit** - Gentle nudges while coding with configurable debouncing
 - **On Open** - Start each file with a principle reminder
 - **On Focus** - Get refreshed when switching between files
+- **On Idle** - Encourage breaks or suggest different approaches after inactivity
 
 ### ⏰ Time-Based Notifications
 
@@ -248,6 +249,11 @@ Add your own rules in `settings.json`:
       "message": "This file is getting large - Consider refactoring.",
       "filePattern": "**/*.{ts,js,tsx,jsx}",
       "lineSizeThreshold": 300
+    },
+    {
+      "trigger": "onIdle",
+      "message": "You've been coding for a while - Take a break or try a different approach!",
+      "idleDuration": 15
     }
   ]
 }
@@ -260,6 +266,9 @@ Add your own rules in `settings.json`:
 | `filePattern`       | Optional glob to scope the rule.                                                      | Example: `**/*.md` (defaults to all files when omitted). |
 | `deletionThreshold` | For `onLargeDelete`: minimum number of lines to trigger (default: 100)                | Range: 1-10000 lines                                     |
 | `lineSizeThreshold` | For `onFileSizeExceeded`: line count threshold to trigger notification (default: 300) | Range: 1-10000 lines                                     |
+| `idleDuration`      | For `onIdle`: minutes of inactivity before notification (default: 15)                 | Range: 1-120 minutes                                     |
+
+**Note:** If multiple `onIdle` rules are defined, only the first matching rule will trigger. To receive multiple idle notifications, use different `idleDuration` values with proper intervals.
 
 ### Time-Based Notifications
 
