@@ -10,6 +10,8 @@ let timerManager: TimerManager | undefined;
 let idleManager: IdleManager | undefined;
 // Track which files have already triggered onFileSizeExceeded to avoid duplicate notifications
 const notifiedFilesForSize = new Map<string, Set<number>>();
+// Track save operations to prevent onFileSizeExceeded from firing during save
+let isSavingFile = false;
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('[code-mantra] Extension activated');
@@ -241,6 +243,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register onFileSizeExceeded trigger
 	const onFileSizeExceededDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
+		// Skip processing if we're in the middle of a save operation
+		if (isSavingFile) {
+			console.log('[code-mantra] Skipping onFileSizeExceeded during save operation');
+			return;
+		}
+
 		const document = event.document;
 		const rules = getRules().filter(
 			rule => rule.trigger === 'onFileSizeExceeded' && rule.enabled !== false
@@ -301,12 +309,20 @@ export function activate(context: vscode.ExtensionContext) {
 	if (timeBasedEnabled && resetOn) {
 		if (resetOn.includes('save')) {
 			context.subscriptions.push(
-				vscode.workspace.onDidSaveTextDocument(() => {
+				vscode.workspace.onDidSaveTextDocument((document) => {
+					// Set flag to prevent onFileSizeExceeded from firing during save
+					isSavingFile = true;
+
 					// Update idle state on activity
 					idleManager?.updateActivity();
 
 					console.log('[code-mantra] File saved, resetting timers');
 					reinitializeTimers();
+
+					// Reset flag after a short delay
+					setTimeout(() => {
+						isSavingFile = false;
+					}, 100);
 				})
 			);
 		}

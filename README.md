@@ -268,6 +268,8 @@ Add your own rules in `settings.json`:
 | `lineSizeThreshold` | For `onFileSizeExceeded`: line count threshold to trigger notification (default: 300) | Range: 1-10000 lines                                     |
 | `idleDuration`      | For `onIdle`: minutes of inactivity before notification (default: 15)                 | Range: 1-120 minutes                                     |
 
+**Note:** If multiple `onIdle` rules are defined, only the first matching rule will trigger. To receive multiple idle notifications, use different `idleDuration` values with proper intervals.
+
 ### Time-Based Notifications
 
 Code Mantra can show notifications at regular time intervals to remind you to take breaks or follow the Pomodoro Technique:

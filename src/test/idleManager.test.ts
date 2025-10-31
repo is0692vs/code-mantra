@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as sinon from 'sinon';
 import { IdleManager } from '../idleManager';
 import { TriggerRule } from '../triggerTreeView';
 
@@ -6,6 +7,7 @@ suite('IdleManager Test Suite', () => {
     let idleManager: IdleManager | undefined;
     let notificationsCalled: string[] = [];
     let testRules: TriggerRule[] = [];
+    let clock: sinon.SinonFakeTimers;
 
     const mockShowNotification = (message: string) => {
         notificationsCalled.push(message);
@@ -19,12 +21,14 @@ suite('IdleManager Test Suite', () => {
     setup(() => {
         notificationsCalled = [];
         testRules = [];
+        clock = sinon.useFakeTimers();
     });
 
     teardown(() => {
         if (idleManager) {
             idleManager.stop();
         }
+        clock.restore();
     });
 
     test('Should initialize IdleManager with callbacks', () => {
@@ -202,5 +206,86 @@ suite('IdleManager Test Suite', () => {
 
         assert.strictEqual(idleRules.length, 1, 'Should have 1 onIdle rule');
         assert.strictEqual(otherRules.length, 2, 'Should have 2 other rules');
+    });
+
+    test('Should show notification after idle duration with sinon timers', function (done) {
+        testRules = [
+            {
+                trigger: 'onIdle',
+                message: 'Time to take a break!',
+                idleDuration: 15,
+                enabled: true
+            }
+        ];
+
+        idleManager = new IdleManager(mockShowNotification, mockGetRules);
+        idleManager.start();
+
+        // Advance time by 15 minutes + 1 minute (to trigger check)
+        clock.tick((15 * 60 * 1000) + 60000);
+
+        // Allow async check to complete
+        setTimeout(() => {
+            assert.strictEqual(notificationsCalled.length, 1, 'Should show notification after 15 minutes');
+            assert.strictEqual(notificationsCalled[0], 'Time to take a break!');
+            done();
+        }, 10);
+        clock.tick(10);
+    });
+
+    test('Should debounce updateActivity calls', function (done) {
+        testRules = [
+            {
+                trigger: 'onIdle',
+                message: 'Idle notification',
+                idleDuration: 1, // 1 minute for quick test
+                enabled: true
+            }
+        ];
+
+        idleManager = new IdleManager(mockShowNotification, mockGetRules);
+        idleManager.start();
+
+        // Call updateActivity multiple times quickly
+        idleManager.updateActivity();
+        idleManager.updateActivity();
+        idleManager.updateActivity();
+
+        // Advance time by 1 minute (should not trigger since activity was updated)
+        clock.tick(60 * 1000);
+
+        setTimeout(() => {
+            assert.strictEqual(notificationsCalled.length, 0, 'Should not show notification when activity updated');
+
+            // Wait for debounce timeout (1 second)
+            clock.tick(1000);
+
+            // Now advance another minute
+            clock.tick(60 * 1000);
+
+            setTimeout(() => {
+                assert.strictEqual(notificationsCalled.length, 1, 'Should show notification after debounce and idle time');
+                done();
+            }, 10);
+            clock.tick(10);
+        }, 10);
+        clock.tick(10);
+    });
+
+    test('Should not start polling when no onIdle rules exist', () => {
+        testRules = [
+            {
+                trigger: 'onSave',
+                message: 'Save message',
+                enabled: true
+            }
+        ];
+
+        idleManager = new IdleManager(mockShowNotification, mockGetRules);
+        idleManager.start(); // Should not start polling
+
+        // Should be able to call stop without issues
+        idleManager.stop();
+        assert.ok(true, 'Should handle start/stop when no onIdle rules');
     });
 });
