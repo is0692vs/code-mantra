@@ -157,14 +157,16 @@ Configure when notifications should appear:
 
 **Available Triggers:**
 
-| Trigger    | When it fires                 | Recommended use                                               |
-| ---------- | ----------------------------- | ------------------------------------------------------------- |
-| `onSave`   | After saving a file           | Best default option before committing changes.                |
-| `onEdit`   | While editing (after a delay) | Gentle nudges without interrupting flow thanks to debouncing. |
-| `onOpen`   | As soon as a file opens       | Kick off work with a reminder when you start editing.         |
-| `onFocus`  | When the editor gains focus   | Helpful when switching between files or windows.              |
-| `onCreate` | When a new file is created    | Ask clarifying questions about file naming and structure.     |
-| `onDelete` | When a file is deleted        | Remind about dependencies and related cleanup tasks.          |
+| Trigger              | When it fires                      | Recommended use                                               |
+| -------------------- | ---------------------------------- | ------------------------------------------------------------- |
+| `onSave`             | After saving a file                | Best default option before committing changes.                |
+| `onEdit`             | While editing (after a delay)      | Gentle nudges without interrupting flow thanks to debouncing. |
+| `onOpen`             | As soon as a file opens            | Kick off work with a reminder when you start editing.         |
+| `onFocus`            | When the editor gains focus        | Helpful when switching between files or windows.              |
+| `onCreate`           | When a new file is created         | Ask clarifying questions about file naming and structure.     |
+| `onDelete`           | When a file is deleted             | Remind about dependencies and related cleanup tasks.          |
+| `onLargeDelete`      | When deleting many lines at once   | Alert when making significant deletions (configurable lines). |
+| `onFileSizeExceeded` | When a file grows beyond threshold | Remind to refactor when files become too large.               |
 
 ### File Types
 
@@ -229,16 +231,30 @@ Add your own rules in `settings.json`:
       "trigger": "onDelete",
       "message": "Have you checked related dependencies?",
       "filePattern": "**/*"
+    },
+    {
+      "trigger": "onLargeDelete",
+      "message": "Big deletion - Did you really want to remove all that?",
+      "filePattern": "**/*.{ts,js,tsx,jsx}",
+      "deletionThreshold": 100
+    },
+    {
+      "trigger": "onFileSizeExceeded",
+      "message": "This file is getting large - Consider refactoring.",
+      "filePattern": "**/*.{ts,js,tsx,jsx}",
+      "lineSizeThreshold": 300
     }
   ]
 }
 ```
 
-| Property      | Purpose                                                                                   | Notes                                                    |
-| ------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `trigger`     | Matches one of `onSave`, `onEdit`, `onOpen`, `onFocus`, `onCreate`, `onDelete`, `onTimer` | Determines when the notification shows.                  |
-| `message`     | Text shown in the notification toast.                                                     | Keep it short and actionable.                            |
-| `filePattern` | Optional glob to scope the rule.                                                          | Example: `**/*.md` (defaults to all files when omitted). |
+| Property            | Purpose                                                                               | Notes                                                    |
+| ------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `trigger`           | Matches one of the available trigger types                                            | Determines when the notification shows.                  |
+| `message`           | Text shown in the notification toast.                                                 | Keep it short and actionable.                            |
+| `filePattern`       | Optional glob to scope the rule.                                                      | Example: `**/*.md` (defaults to all files when omitted). |
+| `deletionThreshold` | For `onLargeDelete`: minimum number of lines to trigger (default: 100)                | Range: 1-10000 lines                                     |
+| `lineSizeThreshold` | For `onFileSizeExceeded`: line count threshold to trigger notification (default: 300) | Range: 1-10000 lines                                     |
 
 ### Time-Based Notifications
 

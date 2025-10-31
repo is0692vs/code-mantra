@@ -18,6 +18,20 @@ export class TriggerDialog {
     }
 
     /**
+     * Validate threshold input (1-10000 lines, digits only)
+     */
+    private static validateThresholdInput(value: string): string | null {
+        if (!/^\d+$/.test(value.trim())) {
+            return 'Invalid input. Please enter only numbers (no letters or special characters).';
+        }
+        const num = parseInt(value.trim());
+        if (isNaN(num) || num < 1 || num > 10000) {
+            return 'Threshold must be between 1 and 10000 lines.';
+        }
+        return null;
+    }
+
+    /**
      * Validate message input (non-empty)
      */
     private static validateMessageInput(value: string): string | null {
@@ -25,6 +39,29 @@ export class TriggerDialog {
             return 'Message cannot be empty. Please enter a notification message.';
         }
         return null;
+    }
+
+    /**
+     * Prompt for deletion or file size threshold
+     */
+    private static async promptForThreshold(
+        triggerType: 'onLargeDelete' | 'onFileSizeExceeded'
+    ): Promise<number | undefined> {
+        const defaultValue = triggerType === 'onLargeDelete' ? '100' : '300';
+        const prompt = triggerType === 'onLargeDelete'
+            ? 'Enter deletion threshold (number of lines):'
+            : 'Enter file size threshold (number of lines):';
+
+        const input = await this.showInputBoxWithRetry(
+            {
+                prompt: prompt,
+                placeHolder: defaultValue,
+                value: defaultValue
+            },
+            this.validateThresholdInput
+        );
+
+        return input ? parseInt(input) : undefined;
     }
 
     /**
@@ -72,7 +109,9 @@ export class TriggerDialog {
             { label: '🎯 On Focus (onFocus)', value: 'onFocus' as const, description: 'Show notification when editor gains focus' },
             { label: '⏰ Timer (onTimer)', value: 'onTimer' as const, description: 'Show notification at regular time intervals' },
             { label: '➕ Create (onCreate)', value: 'onCreate' as const, description: 'Show notification when a new file is created' },
-            { label: '🗑️ Delete (onDelete)', value: 'onDelete' as const, description: 'Show notification when a file is deleted' }
+            { label: '🗑️ Delete (onDelete)', value: 'onDelete' as const, description: 'Show notification when a file is deleted' },
+            { label: '✂️ Large Delete (onLargeDelete)', value: 'onLargeDelete' as const, description: 'Show notification when deleting many lines' },
+            { label: '📏 File Size Exceeded (onFileSizeExceeded)', value: 'onFileSizeExceeded' as const, description: 'Show notification when file becomes too large' }
         ], {
             placeHolder: 'Select a trigger type',
             title: 'Add New Trigger'
@@ -138,6 +177,52 @@ export class TriggerDialog {
             };
         }
 
+        // For onLargeDelete and onFileSizeExceeded, ask for threshold
+        if (triggerType.value === 'onLargeDelete' || triggerType.value === 'onFileSizeExceeded') {
+            const threshold = await this.promptForThreshold(triggerType.value);
+            if (threshold === undefined) {
+                return undefined;
+            }
+
+            // Enter message
+            const message = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Enter notification message',
+                    placeHolder: 'e.g. Large file detected!'
+                },
+                this.validateMessageInput
+            );
+
+            if (!message) {
+                return undefined;
+            }
+
+            // Enter file pattern
+            const filePattern = await vscode.window.showInputBox({
+                prompt: 'Enter a file glob pattern (optional)',
+                placeHolder: 'e.g. **/*.{ts,js,tsx,jsx} or leave blank for all files',
+                value: ''
+            });
+
+            if (triggerType.value === 'onLargeDelete') {
+                return {
+                    trigger: 'onLargeDelete',
+                    message: message.trim(),
+                    filePattern: filePattern?.trim() || undefined,
+                    deletionThreshold: threshold,
+                    enabled: true
+                };
+            } else {
+                return {
+                    trigger: 'onFileSizeExceeded',
+                    message: message.trim(),
+                    filePattern: filePattern?.trim() || undefined,
+                    lineSizeThreshold: threshold,
+                    enabled: true
+                };
+            }
+        }
+
         // For file-based triggers
         // Enter message
         const message = await this.showInputBoxWithRetry(
@@ -176,7 +261,9 @@ export class TriggerDialog {
             { label: '🎯 On Focus (onFocus)', value: 'onFocus' as const, description: 'Show notification when editor gains focus' },
             { label: '⏰ Timer (onTimer)', value: 'onTimer' as const, description: 'Show notification at regular time intervals' },
             { label: '➕ Create (onCreate)', value: 'onCreate' as const, description: 'Show notification when a new file is created' },
-            { label: '🗑️ Delete (onDelete)', value: 'onDelete' as const, description: 'Show notification when a file is deleted' }
+            { label: '🗑️ Delete (onDelete)', value: 'onDelete' as const, description: 'Show notification when a file is deleted' },
+            { label: '✂️ Large Delete (onLargeDelete)', value: 'onLargeDelete' as const, description: 'Show notification when deleting many lines' },
+            { label: '📏 File Size Exceeded (onFileSizeExceeded)', value: 'onFileSizeExceeded' as const, description: 'Show notification when file becomes too large' }
         ];
 
         const triggerType = await vscode.window.showQuickPick(triggerOptions, {
@@ -226,6 +313,69 @@ export class TriggerDialog {
                 timerType: existingRule.timerType || 'custom',
                 enabled: existingRule.enabled
             };
+        }
+
+        // For onLargeDelete and onFileSizeExceeded, edit threshold
+        if (triggerType.value === 'onLargeDelete' || triggerType.value === 'onFileSizeExceeded') {
+            const currentThreshold = triggerType.value === 'onLargeDelete'
+                ? (existingRule.deletionThreshold || 100)
+                : (existingRule.lineSizeThreshold || 300);
+
+            const thresholdInput = await this.showInputBoxWithRetry(
+                {
+                    prompt: triggerType.value === 'onLargeDelete'
+                        ? 'Edit deletion threshold (number of lines):'
+                        : 'Edit file size threshold (number of lines):',
+                    placeHolder: currentThreshold.toString(),
+                    value: currentThreshold.toString()
+                },
+                this.validateThresholdInput
+            );
+
+            if (!thresholdInput) {
+                return undefined;
+            }
+
+            const threshold = parseInt(thresholdInput.trim());
+
+            // Edit message
+            const message = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Edit notification message',
+                    placeHolder: 'e.g. Large file detected!',
+                    value: existingRule.message
+                },
+                this.validateMessageInput
+            );
+
+            if (!message) {
+                return undefined;
+            }
+
+            // Edit file pattern
+            const filePattern = await vscode.window.showInputBox({
+                prompt: 'Edit file glob pattern (optional)',
+                placeHolder: 'e.g. **/*.{ts,js,tsx,jsx} or leave blank for all files',
+                value: existingRule.filePattern || ''
+            });
+
+            if (triggerType.value === 'onLargeDelete') {
+                return {
+                    trigger: 'onLargeDelete',
+                    message: message.trim(),
+                    filePattern: filePattern?.trim() || undefined,
+                    deletionThreshold: threshold,
+                    enabled: existingRule.enabled
+                };
+            } else {
+                return {
+                    trigger: 'onFileSizeExceeded',
+                    message: message.trim(),
+                    filePattern: filePattern?.trim() || undefined,
+                    lineSizeThreshold: threshold,
+                    enabled: existingRule.enabled
+                };
+            }
         }
 
         // For file-based triggers
