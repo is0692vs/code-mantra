@@ -4,14 +4,25 @@ import { TimerManager, TimeBasedNotification } from './timerManager';
 import { TriggerTreeDataProvider, TriggerTreeItem } from './triggerTreeView';
 import { TriggerDialog } from './triggerDialog';
 import { IdleManager } from './idleManager';
+import { SuppressionManager } from './suppressionManager';
+
+interface Rule {
+	trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onLargeDelete' | 'onFileSizeExceeded' | 'onCreate' | 'onDelete' | 'onWorkspaceOpen' | 'onIdle' | 'onTimer';
+	message: string;
+	filePattern?: string;
+	enabled?: boolean;
+	deletionThreshold?: number;
+	lineSizeThreshold?: number;
+	duration?: number;
+	timerType?: string;
+}
 
 let triggerManager: TriggerManager | undefined;
 let timerManager: TimerManager | undefined;
 let idleManager: IdleManager | undefined;
+let suppressionManager: SuppressionManager | undefined;
 // Track which files have already triggered onFileSizeExceeded to avoid duplicate notifications
 const notifiedFilesForSize = new Map<string, Set<number>>();
-// Track save operations to prevent onFileSizeExceeded from firing during save
-let isSavingFile = false;
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('[code-mantra] Extension activated');
@@ -27,8 +38,12 @@ export function activate(context: vscode.ExtensionContext) {
 		rules: initialConfig.get('rules')
 	});
 
+	// Initialize SuppressionManager
+	suppressionManager = new SuppressionManager();
+	console.log('[code-mantra] SuppressionManager initialized');
+
 	// Initialize TriggerManager
-	triggerManager = new TriggerManager(context, handleTrigger);
+	triggerManager = new TriggerManager(context, handleTrigger, suppressionManager);
 	triggerManager.activate();
 
 	// Initialize TimerManager
@@ -170,9 +185,18 @@ export function activate(context: vscode.ExtensionContext) {
 		const rules = getRules().filter(rule => rule.trigger === 'onCreate' && rule.enabled !== false);
 
 		for (const file of event.files) {
-			console.log(`[code-mantra] File created: ${file.fsPath}`);
+			const filePath = file.fsPath;
+			console.log(`[code-mantra] File created: ${filePath}`);
+
+			// Check suppression
+			if (suppressionManager?.shouldSuppress(filePath, 'onCreate')) {
+				console.log('[code-mantra] Skipping onCreate due to suppression');
+				continue;
+			}
+
 			for (const rule of rules) {
-				if (shouldTriggerForFile(file.fsPath, rule.filePattern)) {
+				if (shouldTriggerForFile(filePath, rule.filePattern)) {
+					suppressionManager?.recordNotification(filePath, 'onCreate');
 					showNotification(rule.message);
 				}
 			}
@@ -180,6 +204,18 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(onCreateDisposable);
 	console.log('[code-mantra] onCreate trigger registered');
+
+	// ファイルを開いた時に現在の行数を記録（閾値跨ぎ判定用）
+	context.subscriptions.push(
+		vscode.workspace.onDidOpenTextDocument((document) => {
+			if (suppressionManager && document.uri.scheme === 'file') {
+				const filePath = document.uri.fsPath;
+				const currentLineCount = document.lineCount;
+				suppressionManager.updateLineCount(filePath, currentLineCount);
+				console.log(`[code-mantra] Initialized line count tracking for ${filePath}: ${currentLineCount} lines`);
+			}
+		})
+	);
 
 	// Register onDelete trigger
 	const onDeleteDisposable = vscode.workspace.onDidDeleteFiles((event) => {
@@ -215,6 +251,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Clean up file tracking when file is closed
 	const onCloseDisposable = vscode.workspace.onDidCloseTextDocument((document) => {
 		notifiedFilesForSize.delete(document.uri.fsPath);
+		suppressionManager?.cleanupFile(document.uri.fsPath);
 	});
 	context.subscriptions.push(onCloseDisposable);
 	console.log('[code-mantra] File close handler registered');
@@ -231,19 +268,14 @@ export function activate(context: vscode.ExtensionContext) {
 		if (resetOn.includes('save')) {
 			context.subscriptions.push(
 				vscode.workspace.onDidSaveTextDocument((document) => {
-					// Set flag to prevent onFileSizeExceeded from firing during save
-					isSavingFile = true;
+					// Mark file as being saved to suppress change events
+					suppressionManager?.markFileSaving(document.uri.fsPath);
 
 					// Update idle state on activity
 					idleManager?.updateActivity();
 
 					console.log('[code-mantra] File saved, resetting timers');
 					reinitializeTimers();
-
-					// Reset flag after a short delay
-					setTimeout(() => {
-						isSavingFile = false;
-					}, 100);
 				})
 			);
 		}
@@ -458,9 +490,9 @@ function matchesGlobPattern(filePath: string, pattern: string): boolean {
 	return result;
 }
 
-function getRules(): Array<{ trigger: string, message: string, filePattern?: string, enabled?: boolean }> {
+function getRules(): Rule[] {
 	const config = vscode.workspace.getConfiguration('codeMantra');
-	return config.get<Array<{ trigger: string, message: string, filePattern?: string, enabled?: boolean }>>('rules', []);
+	return config.get<Rule[]>('rules', []);
 }
 
 function shouldTriggerForFile(filePath: string, filePattern?: string): boolean {
@@ -486,45 +518,69 @@ function showNotification(message: string): void {
  * Handle onLargeDelete trigger events
  */
 function handleLargeDelete(event: vscode.TextDocumentChangeEvent): void {
+	const document = event.document;
+	const filePath = document.uri.fsPath;
+
 	// Skip processing if we're in the middle of a save operation
-	if (isSavingFile) {
+	if (suppressionManager?.isFileSaving(filePath)) {
 		console.log('[code-mantra] Skipping onLargeDelete during save operation');
+		return;
+	}
+
+	// Check if this trigger should be suppressed
+	if (suppressionManager?.shouldSuppress(filePath, 'onLargeDelete')) {
+		console.log('[code-mantra] Skipping onLargeDelete due to suppression');
 		return;
 	}
 
 	// Update idle state on activity
 	idleManager?.updateActivity();
 
-	const document = event.document;
 	const rules = getRules().filter(
 		rule => rule.trigger === 'onLargeDelete' && rule.enabled !== false
-	) as any[];
+	);
 
 	if (rules.length === 0) {
 		return;
 	}
 
+	// Handle empty contentChanges (can occur on first event)
+	if (event.contentChanges.length === 0) {
+		console.log('[code-mantra] onLargeDelete: contentChanges is empty, skipping');
+		return;
+	}
+
 	// Calculate total lines deleted in this change event
+	// Only count actual deletions (not insertions or replacements)
 	let totalLinesDeleted = 0;
 	for (const change of event.contentChanges) {
-		// Calculate lines deleted from the range
 		const startLine = change.range.start.line;
 		const endLine = change.range.end.line;
-		const linesDeleted = endLine - startLine;
-		totalLinesDeleted += linesDeleted;
+		const rangeLines = endLine - startLine;
+
+		// Count as deletion only if:
+		// 1. Range spans multiple lines (rangeLines > 0)
+		// 2. Replacement text has fewer lines than the range
+		const newLines = change.text.split('\n').length - 1;
+
+		if (rangeLines > 0 && newLines < rangeLines) {
+			const linesDeleted = rangeLines - newLines;
+			totalLinesDeleted += linesDeleted;
+		}
 	}
 
 	if (totalLinesDeleted === 0) {
 		return;
 	}
 
-	console.log(`[code-mantra] onLargeDelete: ${totalLinesDeleted} lines deleted in ${document.uri.fsPath}`);
+	console.log(`[code-mantra] onLargeDelete: ${totalLinesDeleted} lines deleted in ${filePath}`);
 
 	for (const rule of rules) {
-		if (shouldTriggerForFile(document.uri.fsPath, rule.filePattern)) {
+		if (shouldTriggerForFile(filePath, rule.filePattern)) {
 			const threshold = rule.deletionThreshold || 100;
 			if (totalLinesDeleted >= threshold) {
 				console.log(`[code-mantra] Large deletion detected: ${totalLinesDeleted} >= ${threshold}`);
+				suppressionManager?.recordNotification(filePath, 'onLargeDelete');
 				showNotification(rule.message);
 			}
 		}
@@ -535,34 +591,45 @@ function handleLargeDelete(event: vscode.TextDocumentChangeEvent): void {
  * Handle onFileSizeExceeded trigger events
  */
 function handleFileSizeExceeded(event: vscode.TextDocumentChangeEvent): void {
+	const document = event.document;
+	const filePath = document.uri.fsPath;
+
 	// Skip processing if we're in the middle of a save operation
-	if (isSavingFile) {
+	if (suppressionManager?.isFileSaving(filePath)) {
 		console.log('[code-mantra] Skipping onFileSizeExceeded during save operation');
 		return;
 	}
 
-	const document = event.document;
+	// Check if this trigger should be suppressed
+	if (suppressionManager?.shouldSuppress(filePath, 'onFileSizeExceeded')) {
+		console.log('[code-mantra] Skipping onFileSizeExceeded due to suppression');
+		return;
+	}
+
 	const rules = getRules().filter(
 		rule => rule.trigger === 'onFileSizeExceeded' && rule.enabled !== false
-	) as any[];
+	);
 
 	if (rules.length === 0) {
 		return;
 	}
 
-	const filePath = document.uri.fsPath;
 	const currentLineCount = document.lineCount;
+	const previousLineCount = suppressionManager?.getPreviousLineCount(filePath);
 
-	console.log(`[code-mantra] onFileSizeExceeded: Current line count: ${currentLineCount} in ${filePath}`);
+	console.log(`[code-mantra] onFileSizeExceeded: Line count: ${previousLineCount} -> ${currentLineCount} in ${filePath}`);
 
 	for (const rule of rules) {
 		if (shouldTriggerForFile(filePath, rule.filePattern)) {
 			const threshold = rule.lineSizeThreshold || 300;
 			const notifiedThresholds = notifiedFilesForSize.get(filePath) || new Set<number>();
 
-			// If this threshold hasn't been notified yet and line count exceeds threshold
-			if (!notifiedThresholds.has(threshold) && currentLineCount >= threshold) {
-				console.log(`[code-mantra] File size exceeded threshold: ${currentLineCount} >= ${threshold}`);
+			// Check if we crossed the threshold (previous < threshold, current >= threshold)
+			const crossedThreshold = suppressionManager?.didCrossThreshold(filePath, currentLineCount, threshold);
+
+			if (crossedThreshold && !notifiedThresholds.has(threshold)) {
+				console.log(`[code-mantra] File size CROSSED threshold: ${previousLineCount} -> ${currentLineCount} (threshold: ${threshold})`);
+				suppressionManager?.recordNotification(filePath, 'onFileSizeExceeded');
 				showNotification(rule.message);
 				notifiedThresholds.add(threshold);
 				notifiedFilesForSize.set(filePath, notifiedThresholds);
@@ -579,4 +646,7 @@ function handleFileSizeExceeded(event: vscode.TextDocumentChangeEvent): void {
 			}
 		}
 	}
+
+	// Update the line count tracking for next time
+	suppressionManager?.updateLineCount(filePath, currentLineCount);
 }
