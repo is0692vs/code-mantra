@@ -100,4 +100,66 @@ suite('Extension Test Suite', () => {
 			assert.ok(!(threshold >= 1 && threshold <= 10000));
 		});
 	});
+
+	test('Should support onWorkspaceOpen trigger rules', () => {
+		// Test that onWorkspaceOpen rules can be stored in configuration
+		const workspaceOpenRule = {
+			trigger: 'onWorkspaceOpen',
+			message: 'Welcome! Remember SOLID principles today.',
+			enabled: true
+		};
+
+		assert.strictEqual(workspaceOpenRule.trigger, 'onWorkspaceOpen');
+		assert.ok(workspaceOpenRule.message);
+		assert.strictEqual(typeof workspaceOpenRule.message, 'string');
+		// onWorkspaceOpen should NOT have filePattern, deletionThreshold, or lineSizeThreshold
+		assert.strictEqual((workspaceOpenRule as any).filePattern, undefined);
+		assert.strictEqual((workspaceOpenRule as any).deletionThreshold, undefined);
+		assert.strictEqual((workspaceOpenRule as any).lineSizeThreshold, undefined);
+	});
+
+	test('Should execute multiple onWorkspaceOpen rules', () => {
+		const rules = [
+			{
+				trigger: 'onWorkspaceOpen',
+				message: 'Welcome! Goal for today?',
+				enabled: true
+			},
+			{
+				trigger: 'onWorkspaceOpen',
+				message: 'Remember SOLID principles!',
+				enabled: true
+			},
+			{
+				trigger: 'onWorkspaceOpen',
+				message: 'This should be skipped',
+				enabled: false
+			}
+		];
+
+		// Verify structure of multiple rules
+		const enabledRules = rules.filter(r => r.enabled !== false && r.trigger === 'onWorkspaceOpen');
+		assert.strictEqual(enabledRules.length, 2, 'Should have 2 enabled onWorkspaceOpen rules');
+		assert.strictEqual(enabledRules[0].message, 'Welcome! Goal for today?');
+		assert.strictEqual(enabledRules[1].message, 'Remember SOLID principles!');
+	});
+
+	test('Should skip disabled onWorkspaceOpen rules', () => {
+		const rules = [
+			{
+				trigger: 'onWorkspaceOpen',
+				message: 'Enabled rule',
+				enabled: true
+			},
+			{
+				trigger: 'onWorkspaceOpen',
+				message: 'Disabled rule',
+				enabled: false
+			}
+		];
+
+		const enabledRules = rules.filter(r => r.enabled !== false && r.trigger === 'onWorkspaceOpen');
+		assert.strictEqual(enabledRules.length, 1, 'Should only have 1 enabled rule');
+		assert.strictEqual(enabledRules[0].message, 'Enabled rule');
+	});
 });

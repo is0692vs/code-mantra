@@ -280,6 +280,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(onCloseDisposable);
 	console.log('[code-mantra] File close handler registered');
 
+	// Handle onWorkspaceOpen trigger (shows on activation)
+	triggerManager.handleWorkspaceOpen();
+
 	// Register timer reset events
 	const config = vscode.workspace.getConfiguration('codeMantra');
 	const timeBasedEnabled = config.get<boolean>('timeBasedNotifications.enabled', true);

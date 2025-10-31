@@ -130,4 +130,36 @@ export class TriggerManager {
         this.disposables.push(listener);
         console.log('[code-mantra] onFocus trigger registered');
     }
+
+    /**
+     * Handle workspace open trigger (shows on activation)
+     */
+    handleWorkspaceOpen(): void {
+        const rules = this.getRules().filter(
+            rule => rule.trigger === 'onWorkspaceOpen' && rule.enabled !== false
+        );
+
+        if (rules.length > 0) {
+            console.log(`[code-mantra] Executing ${rules.length} onWorkspaceOpen rules`);
+            rules.forEach(rule => {
+                this.showNotification(rule.message);
+            });
+            console.log('[code-mantra] onWorkspaceOpen trigger executed');
+        }
+    }
+
+    private getRules(): Array<{ trigger: string, message: string, filePattern?: string, enabled?: boolean }> {
+        const config = vscode.workspace.getConfiguration('codeMantra');
+        return config.get<Array<{ trigger: string, message: string, filePattern?: string, enabled?: boolean }>>('rules', []);
+    }
+
+    private showNotification(message: string): void {
+        console.log(`[code-mantra] Displaying notification: ${message}`);
+
+        // 通知の表示を強制的に試行
+        vscode.window.showInformationMessage(`🔔 Code Mantra: ${message}`).then(
+            () => console.log(`[code-mantra] Notification displayed successfully`),
+            (error) => console.error(`[code-mantra] Failed to display notification:`, error)
+        );
+    }
 }

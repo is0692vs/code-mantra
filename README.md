@@ -163,6 +163,7 @@ Configure when notifications should appear:
 | `onEdit`             | While editing (after a delay)      | Gentle nudges without interrupting flow thanks to debouncing. |
 | `onOpen`             | As soon as a file opens            | Kick off work with a reminder when you start editing.         |
 | `onFocus`            | When the editor gains focus        | Helpful when switching between files or windows.              |
+| `onWorkspaceOpen`    | When VS Code starts                | Show a reminder once at startup for workspace-wide principles |
 | `onCreate`           | When a new file is created         | Ask clarifying questions about file naming and structure.     |
 | `onDelete`           | When a file is deleted             | Remind about dependencies and related cleanup tasks.          |
 | `onLargeDelete`      | When deleting many lines at once   | Alert when making significant deletions (configurable lines). |
@@ -221,6 +222,10 @@ Add your own rules in `settings.json`:
       "trigger": "onSave",
       "message": "ETC? (Easier To Change?)",
       "filePattern": "**/*.{ts,js,tsx,jsx}"
+    },
+    {
+      "trigger": "onWorkspaceOpen",
+      "message": "Welcome! Remember to follow SOLID principles today."
     },
     {
       "trigger": "onCreate",

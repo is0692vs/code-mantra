@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 export interface TriggerRule {
-    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onTimer' | 'onCreate' | 'onDelete' | 'onLargeDelete' | 'onFileSizeExceeded';
+    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onWorkspaceOpen' | 'onTimer' | 'onCreate' | 'onDelete' | 'onLargeDelete' | 'onFileSizeExceeded';
     message: string;
     filePattern?: string;
     enabled?: boolean;
@@ -33,6 +33,9 @@ export class TriggerTreeItem extends vscode.TreeItem {
 
     private getTooltip(): string {
         const status = this.rule.enabled !== false ? '✅ Enabled' : '❌ Disabled';
+        if (this.rule.trigger === 'onWorkspaceOpen') {
+            return `${status}\nTrigger: Workspace Open\nShows once when VS Code starts`;
+        }
         if (this.rule.trigger === 'onTimer') {
             const duration = this.rule.duration || 25;
             const type = this.rule.timerType || 'custom';
@@ -73,6 +76,7 @@ export class TriggerTreeItem extends vscode.TreeItem {
             case 'onEdit': return '✏️ On Edit';
             case 'onOpen': return '📂 On Open';
             case 'onFocus': return '🎯 On Focus';
+            case 'onWorkspaceOpen': return '🚀 Workspace Open';
             case 'onTimer': return '⏰ Timer';
             case 'onCreate': return '➕ On Create';
             case 'onDelete': return '🗑️ On Delete';
@@ -92,6 +96,8 @@ export class TriggerTreeItem extends vscode.TreeItem {
                 return new vscode.ThemeIcon('folder-opened', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.yellow' : 'disabledForeground'));
             case 'onFocus':
                 return new vscode.ThemeIcon('target', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.purple' : 'disabledForeground'));
+            case 'onWorkspaceOpen':
+                return new vscode.ThemeIcon('rocket', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.blue' : 'disabledForeground'));
             case 'onTimer':
                 return new vscode.ThemeIcon('watch', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.orange' : 'disabledForeground'));
             case 'onCreate':
