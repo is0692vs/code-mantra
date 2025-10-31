@@ -6,6 +6,8 @@ import { TriggerDialog } from './triggerDialog';
 
 let triggerManager: TriggerManager | undefined;
 let timerManager: TimerManager | undefined;
+// Track which files have already triggered onFileSizeExceeded to avoid duplicate notifications
+const notifiedFilesForSize = new Map<string, number>();
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('[code-mantra] Extension activated');
@@ -186,6 +188,95 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(onDeleteDisposable);
 	console.log('[code-mantra] onDelete trigger registered');
+
+	// Register onLargeDelete trigger
+	const onLargeDeleteDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
+		const document = event.document;
+		const rules = getRules().filter(
+			rule => rule.trigger === 'onLargeDelete' && rule.enabled !== false
+		) as any[];
+
+		if (rules.length === 0) {
+			return;
+		}
+
+		// Calculate total lines deleted in this change event
+		let totalLinesDeleted = 0;
+		for (const change of event.contentChanges) {
+			// Calculate lines deleted from the range
+			const startLine = change.range.start.line;
+			const endLine = change.range.end.line;
+			const linesDeleted = endLine - startLine;
+			totalLinesDeleted += linesDeleted;
+		}
+
+		if (totalLinesDeleted === 0) {
+			return;
+		}
+
+		console.log(`[code-mantra] onLargeDelete: ${totalLinesDeleted} lines deleted in ${document.uri.fsPath}`);
+
+		for (const rule of rules) {
+			if (shouldTriggerForFile(document.uri.fsPath, rule.filePattern)) {
+				const threshold = rule.deletionThreshold || 100;
+				if (totalLinesDeleted >= threshold) {
+					console.log(`[code-mantra] Large deletion detected: ${totalLinesDeleted} >= ${threshold}`);
+					showNotification(rule.message);
+				}
+			}
+		}
+	});
+	context.subscriptions.push(onLargeDeleteDisposable);
+	console.log('[code-mantra] onLargeDelete trigger registered');
+
+	// Register onFileSizeExceeded trigger
+	const onFileSizeExceededDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
+		const document = event.document;
+		const rules = getRules().filter(
+			rule => rule.trigger === 'onFileSizeExceeded' && rule.enabled !== false
+		) as any[];
+
+		if (rules.length === 0) {
+			return;
+		}
+
+		const filePath = document.uri.fsPath;
+		const currentLineCount = document.lineCount;
+
+		console.log(`[code-mantra] onFileSizeExceeded: Current line count: ${currentLineCount} in ${filePath}`);
+
+		for (const rule of rules) {
+			if (shouldTriggerForFile(filePath, rule.filePattern)) {
+				const threshold = rule.lineSizeThreshold || 300;
+				const previousLineCount = notifiedFilesForSize.get(filePath) || 0;
+
+				// If file crossed threshold from below
+				if (previousLineCount < threshold && currentLineCount >= threshold) {
+					console.log(`[code-mantra] File size exceeded threshold: ${currentLineCount} >= ${threshold}`);
+					showNotification(rule.message);
+					notifiedFilesForSize.set(filePath, currentLineCount);
+				}
+				// If file is still above threshold, update the line count
+				else if (currentLineCount >= threshold) {
+					notifiedFilesForSize.set(filePath, currentLineCount);
+				}
+				// If file fell below threshold, reset the notification flag
+				else if (previousLineCount >= threshold && currentLineCount < threshold) {
+					console.log(`[code-mantra] File size returned below threshold: ${currentLineCount} < ${threshold}`);
+					notifiedFilesForSize.delete(filePath);
+				}
+			}
+		}
+	});
+	context.subscriptions.push(onFileSizeExceededDisposable);
+	console.log('[code-mantra] onFileSizeExceeded trigger registered');
+
+	// Clean up file tracking when file is closed
+	const onCloseDisposable = vscode.workspace.onDidCloseTextDocument((document) => {
+		notifiedFilesForSize.delete(document.uri.fsPath);
+	});
+	context.subscriptions.push(onCloseDisposable);
+	console.log('[code-mantra] File close handler registered');
 
 	// Register timer reset events
 	const config = vscode.workspace.getConfiguration('codeMantra');

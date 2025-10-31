@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
 
 export interface TriggerRule {
-    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onTimer' | 'onCreate' | 'onDelete';
+    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onTimer' | 'onCreate' | 'onDelete' | 'onLargeDelete' | 'onFileSizeExceeded';
     message: string;
     filePattern?: string;
     enabled?: boolean;
     duration?: number; // duration in minutes (only for onTimer)
     timerType?: 'workBreak' | 'pomodoro' | 'custom'; // timer type (only for onTimer)
+    deletionThreshold?: number; // deletion threshold in lines (only for onLargeDelete)
+    lineSizeThreshold?: number; // file size threshold in lines (only for onFileSizeExceeded)
 }
 
 export class TriggerTreeItem extends vscode.TreeItem {
@@ -36,6 +38,14 @@ export class TriggerTreeItem extends vscode.TreeItem {
             const type = this.rule.timerType || 'custom';
             return `${status}\nTrigger: Time-based (every ${duration} min)\nType: ${type}`;
         }
+        if (this.rule.trigger === 'onLargeDelete') {
+            const threshold = this.rule.deletionThreshold || 100;
+            return `${status}\nTrigger: Large Delete (${threshold}+ lines)`;
+        }
+        if (this.rule.trigger === 'onFileSizeExceeded') {
+            const threshold = this.rule.lineSizeThreshold || 300;
+            return `${status}\nTrigger: File Size Exceeded (${threshold}+ lines)`;
+        }
         const pattern = this.rule.filePattern || '**/*.*';
         return `${status}\nTrigger: ${this.rule.trigger}\nPattern: ${pattern}`;
     }
@@ -44,6 +54,14 @@ export class TriggerTreeItem extends vscode.TreeItem {
         if (this.rule.trigger === 'onTimer') {
             const duration = this.rule.duration || 25;
             return `${this.getTriggerLabel()} • Every ${duration} min`;
+        }
+        if (this.rule.trigger === 'onLargeDelete') {
+            const threshold = this.rule.deletionThreshold || 100;
+            return `${this.getTriggerLabel()} • ${threshold}+ lines`;
+        }
+        if (this.rule.trigger === 'onFileSizeExceeded') {
+            const threshold = this.rule.lineSizeThreshold || 300;
+            return `${this.getTriggerLabel()} • ${threshold}+ lines`;
         }
         const pattern = this.rule.filePattern || 'All files';
         return `${this.getTriggerLabel()} • ${pattern}`;
@@ -58,6 +76,8 @@ export class TriggerTreeItem extends vscode.TreeItem {
             case 'onTimer': return '⏰ Timer';
             case 'onCreate': return '➕ On Create';
             case 'onDelete': return '🗑️ On Delete';
+            case 'onLargeDelete': return '✂️ Large Delete';
+            case 'onFileSizeExceeded': return '📏 File Size';
             default: return this.rule.trigger;
         }
     }
@@ -78,6 +98,10 @@ export class TriggerTreeItem extends vscode.TreeItem {
                 return new vscode.ThemeIcon('add', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.green' : 'disabledForeground'));
             case 'onDelete':
                 return new vscode.ThemeIcon('trash', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.red' : 'disabledForeground'));
+            case 'onLargeDelete':
+                return new vscode.ThemeIcon('scissors', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.yellow' : 'disabledForeground'));
+            case 'onFileSizeExceeded':
+                return new vscode.ThemeIcon('dashboard', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.orange' : 'disabledForeground'));
             default:
                 return new vscode.ThemeIcon('bell');
         }
