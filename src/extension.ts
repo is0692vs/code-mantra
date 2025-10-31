@@ -205,7 +205,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(onCreateDisposable);
 	console.log('[code-mantra] onCreate trigger registered');
 
-	// ファイルを開いた時に現在の行数を記録（閾値跨ぎ判定用）
+	// Record current line count when file is opened (for threshold crossing detection)
 	context.subscriptions.push(
 		vscode.workspace.onDidOpenTextDocument((document) => {
 			if (suppressionManager && document.uri.scheme === 'file') {
