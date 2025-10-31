@@ -108,6 +108,7 @@ export class TriggerDialog {
             { label: '📂 On Open (onOpen)', value: 'onOpen' as const, description: 'Show notification when a file is opened' },
             { label: '🎯 On Focus (onFocus)', value: 'onFocus' as const, description: 'Show notification when editor gains focus' },
             { label: '🚀 Workspace Open (onWorkspaceOpen)', value: 'onWorkspaceOpen' as const, description: 'Show reminder when VS Code starts' },
+            { label: '💤 Idle (onIdle)', value: 'onIdle' as const, description: 'Triggers after period of inactivity' },
             { label: '⏰ Timer (onTimer)', value: 'onTimer' as const, description: 'Show notification at regular time intervals' },
             { label: '➕ Create (onCreate)', value: 'onCreate' as const, description: 'Show notification when a new file is created' },
             { label: '🗑️ Delete (onDelete)', value: 'onDelete' as const, description: 'Show notification when a file is deleted' },
@@ -138,6 +139,45 @@ export class TriggerDialog {
 
             return {
                 trigger: 'onWorkspaceOpen',
+                message: message.trim(),
+                enabled: true
+            };
+        }
+
+        // For onIdle, ask for duration and message
+        if (triggerType.value === 'onIdle') {
+            const durationInput = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Enter idle duration in minutes (1-120)',
+                    value: '15'
+                },
+                this.validateDurationInput
+            );
+
+            if (!durationInput) {
+                return undefined;
+            }
+
+            const idleDuration = parseInt(durationInput.trim());
+
+            // Default message suggestion
+            const defaultIdleMessage = `Feeling stuck? Take a ${idleDuration} minute break!`;
+            const message = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Enter notification message',
+                    placeHolder: 'e.g. Feeling stuck? Take a break!',
+                    value: defaultIdleMessage
+                },
+                this.validateMessageInput
+            );
+
+            if (!message) {
+                return undefined;
+            }
+
+            return {
+                trigger: 'onIdle',
+                idleDuration,
                 message: message.trim(),
                 enabled: true
             };
@@ -282,6 +322,7 @@ export class TriggerDialog {
             { label: '📂 On Open (onOpen)', value: 'onOpen' as const, description: 'Show notification when a file is opened' },
             { label: '🎯 On Focus (onFocus)', value: 'onFocus' as const, description: 'Show notification when editor gains focus' },
             { label: '🚀 Workspace Open (onWorkspaceOpen)', value: 'onWorkspaceOpen' as const, description: 'Show reminder when VS Code starts' },
+            { label: '💤 Idle (onIdle)', value: 'onIdle' as const, description: 'Triggers after period of inactivity' },
             { label: '⏰ Timer (onTimer)', value: 'onTimer' as const, description: 'Show notification at regular time intervals' },
             { label: '➕ Create (onCreate)', value: 'onCreate' as const, description: 'Show notification when a new file is created' },
             { label: '🗑️ Delete (onDelete)', value: 'onDelete' as const, description: 'Show notification when a file is deleted' },
@@ -315,6 +356,44 @@ export class TriggerDialog {
 
             return {
                 trigger: 'onWorkspaceOpen',
+                message: message.trim(),
+                enabled: existingRule.enabled
+            };
+        }
+
+        // For onIdle, edit duration and message
+        if (triggerType.value === 'onIdle') {
+            const currentDuration = existingRule.idleDuration || 15;
+            const durationInput = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Edit idle duration in minutes (1-120)',
+                    value: currentDuration.toString()
+                },
+                this.validateDurationInput
+            );
+
+            if (!durationInput) {
+                return undefined;
+            }
+
+            const idleDuration = parseInt(durationInput.trim());
+
+            const message = await this.showInputBoxWithRetry(
+                {
+                    prompt: 'Edit notification message',
+                    placeHolder: 'e.g. Feeling stuck? Take a break!',
+                    value: existingRule.message
+                },
+                this.validateMessageInput
+            );
+
+            if (!message) {
+                return undefined;
+            }
+
+            return {
+                trigger: 'onIdle',
+                idleDuration,
                 message: message.trim(),
                 enabled: existingRule.enabled
             };

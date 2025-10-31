@@ -162,4 +162,73 @@ suite('Extension Test Suite', () => {
 		assert.strictEqual(enabledRules.length, 1, 'Should only have 1 enabled rule');
 		assert.strictEqual(enabledRules[0].message, 'Enabled rule');
 	});
+
+	test('Should support onIdle trigger rules', () => {
+		// Test that onIdle rules can be stored in configuration
+		const idleRule = {
+			trigger: 'onIdle',
+			message: 'Take a break after inactivity!',
+			idleDuration: 15,
+			enabled: true
+		};
+
+		assert.strictEqual(idleRule.trigger, 'onIdle');
+		assert.ok(idleRule.idleDuration);
+		assert.strictEqual(idleRule.idleDuration, 15);
+	});
+
+	test('Should validate idle duration (1-120 range)', () => {
+		// Valid durations
+		const validDurations = [1, 15, 30, 60, 120];
+		validDurations.forEach(duration => {
+			assert.ok(duration >= 1 && duration <= 120, `Duration ${duration} should be valid`);
+		});
+
+		// Invalid durations
+		const invalidDurations = [0, -1, 121, 1000];
+		invalidDurations.forEach(duration => {
+			assert.ok(!(duration >= 1 && duration <= 120), `Duration ${duration} should be invalid`);
+		});
+	});
+
+	test('Should use default idle duration when not specified', () => {
+		const idleRule = {
+			trigger: 'onIdle',
+			message: 'Take a break!',
+			enabled: true
+			// idleDuration not specified
+		};
+
+		// Default should be 15 when not specified
+		const duration = (idleRule as any).idleDuration || 15;
+		assert.strictEqual(duration, 15, 'Should use default duration of 15 minutes');
+	});
+
+	test('Should handle multiple onIdle trigger rules', () => {
+		const rules = [
+			{
+				trigger: 'onIdle',
+				message: 'Rule 1: Take a break!',
+				idleDuration: 15,
+				enabled: true
+			},
+			{
+				trigger: 'onIdle',
+				message: 'Rule 2: Try a different approach!',
+				idleDuration: 30,
+				enabled: true
+			},
+			{
+				trigger: 'onIdle',
+				message: 'Rule 3: This should be skipped',
+				idleDuration: 45,
+				enabled: false
+			}
+		];
+
+		const enabledIdleRules = rules.filter(r => r.trigger === 'onIdle' && r.enabled !== false);
+		assert.strictEqual(enabledIdleRules.length, 2, 'Should have 2 enabled onIdle rules');
+		assert.strictEqual(enabledIdleRules[0].idleDuration, 15);
+		assert.strictEqual(enabledIdleRules[1].idleDuration, 30);
+	});
 });

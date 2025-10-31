@@ -3,9 +3,11 @@ import { TriggerManager } from './triggerManager';
 import { TimerManager, TimeBasedNotification } from './timerManager';
 import { TriggerTreeDataProvider, TriggerTreeItem } from './triggerTreeView';
 import { TriggerDialog } from './triggerDialog';
+import { IdleManager } from './idleManager';
 
 let triggerManager: TriggerManager | undefined;
 let timerManager: TimerManager | undefined;
+let idleManager: IdleManager | undefined;
 // Track which files have already triggered onFileSizeExceeded to avoid duplicate notifications
 const notifiedFilesForSize = new Map<string, Set<number>>();
 
@@ -30,6 +32,11 @@ export function activate(context: vscode.ExtensionContext) {
 	// Initialize TimerManager
 	timerManager = new TimerManager();
 	initializeTimers();
+
+	// Initialize IdleManager
+	idleManager = new IdleManager(showNotification, getRules);
+	idleManager.start();
+	console.log('[code-mantra] IdleManager initialized and started');
 
 	// Initialize the TreeView
 	console.log('[code-mantra] Initializing TreeView...');
@@ -191,6 +198,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register onLargeDelete trigger
 	const onLargeDeleteDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
+		// Update idle state on activity
+		idleManager?.updateActivity();
+
 		const document = event.document;
 		const rules = getRules().filter(
 			rule => rule.trigger === 'onLargeDelete' && rule.enabled !== false
@@ -292,6 +302,9 @@ export function activate(context: vscode.ExtensionContext) {
 		if (resetOn.includes('save')) {
 			context.subscriptions.push(
 				vscode.workspace.onDidSaveTextDocument(() => {
+					// Update idle state on activity
+					idleManager?.updateActivity();
+
 					console.log('[code-mantra] File saved, resetting timers');
 					reinitializeTimers();
 				})
@@ -302,6 +315,9 @@ export function activate(context: vscode.ExtensionContext) {
 			context.subscriptions.push(
 				vscode.window.onDidChangeWindowState((state) => {
 					if (state.focused) {
+						// Update idle state on activity
+						idleManager?.updateActivity();
+
 						console.log('[code-mantra] Window focused, resetting timers');
 						reinitializeTimers();
 					}
@@ -310,14 +326,31 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	// Register TimerManager cleanup
+	// Register activity tracking for onIdle trigger
+	context.subscriptions.push(
+		vscode.window.onDidChangeActiveTextEditor(() => {
+			idleManager?.updateActivity();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.workspace.onDidOpenTextDocument(() => {
+			idleManager?.updateActivity();
+		})
+	);
+
+	// Register TimerManager and IdleManager cleanup
 	context.subscriptions.push({
-		dispose: () => timerManager?.dispose()
+		dispose: () => {
+			idleManager?.stop();
+			timerManager?.dispose();
+		}
 	});
 }
 
 export function deactivate() {
 	triggerManager?.deactivate();
+	idleManager?.stop();
 	timerManager?.dispose();
 	// Clear caches
 	regexCache.clear();

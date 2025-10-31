@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 export interface TriggerRule {
-    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onWorkspaceOpen' | 'onTimer' | 'onCreate' | 'onDelete' | 'onLargeDelete' | 'onFileSizeExceeded';
+    trigger: 'onSave' | 'onEdit' | 'onOpen' | 'onFocus' | 'onWorkspaceOpen' | 'onTimer' | 'onCreate' | 'onDelete' | 'onLargeDelete' | 'onFileSizeExceeded' | 'onIdle';
     message: string;
     filePattern?: string;
     enabled?: boolean;
@@ -9,6 +9,7 @@ export interface TriggerRule {
     timerType?: 'workBreak' | 'pomodoro' | 'custom'; // timer type (only for onTimer)
     deletionThreshold?: number; // deletion threshold in lines (only for onLargeDelete)
     lineSizeThreshold?: number; // file size threshold in lines (only for onFileSizeExceeded)
+    idleDuration?: number; // Duration in minutes for idle detection (default: 15)
 }
 
 export class TriggerTreeItem extends vscode.TreeItem {
@@ -36,6 +37,10 @@ export class TriggerTreeItem extends vscode.TreeItem {
         if (this.rule.trigger === 'onWorkspaceOpen') {
             return `${status}\nTrigger: Workspace Open\nShows once when VS Code starts`;
         }
+        if (this.rule.trigger === 'onIdle') {
+            const idleMinutes = this.rule.idleDuration || 15;
+            return `${status}\nTrigger: Idle Detection\nShows after ${idleMinutes} minutes of inactivity`;
+        }
         if (this.rule.trigger === 'onTimer') {
             const duration = this.rule.duration || 25;
             const type = this.rule.timerType || 'custom';
@@ -58,6 +63,10 @@ export class TriggerTreeItem extends vscode.TreeItem {
             const duration = this.rule.duration || 25;
             return `${this.getTriggerLabel()} • Every ${duration} min`;
         }
+        if (this.rule.trigger === 'onIdle') {
+            const minutes = this.rule.idleDuration || 15;
+            return `${this.getTriggerLabel()} • After ${minutes} min idle`;
+        }
         if (this.rule.trigger === 'onLargeDelete') {
             const threshold = this.rule.deletionThreshold || 100;
             return `${this.getTriggerLabel()} • ${threshold}+ lines`;
@@ -77,6 +86,7 @@ export class TriggerTreeItem extends vscode.TreeItem {
             case 'onOpen': return '📂 On Open';
             case 'onFocus': return '🎯 On Focus';
             case 'onWorkspaceOpen': return '🚀 Workspace Open';
+            case 'onIdle': return '💤 Idle';
             case 'onTimer': return '⏰ Timer';
             case 'onCreate': return '➕ On Create';
             case 'onDelete': return '🗑️ On Delete';
@@ -98,6 +108,8 @@ export class TriggerTreeItem extends vscode.TreeItem {
                 return new vscode.ThemeIcon('target', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.purple' : 'disabledForeground'));
             case 'onWorkspaceOpen':
                 return new vscode.ThemeIcon('rocket', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.blue' : 'disabledForeground'));
+            case 'onIdle':
+                return new vscode.ThemeIcon('debug-pause', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.purple' : 'disabledForeground'));
             case 'onTimer':
                 return new vscode.ThemeIcon('watch', new vscode.ThemeColor(this.rule.enabled !== false ? 'charts.orange' : 'disabledForeground'));
             case 'onCreate':
