@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { SuppressionManager } from './suppressionManager';
 
 export interface TriggerConfig {
     enabled: boolean;
@@ -15,12 +16,14 @@ export interface TriggersConfig {
 export class TriggerManager {
     private disposables: vscode.Disposable[] = [];
     private editDebounceTimer: NodeJS.Timeout | undefined;
-    private lastNotificationTime: number = 0;
+    // Track last notification time per trigger type per file
+    private lastNotificationTimes = new Map<string, Map<string, number>>();
     private readonly MIN_NOTIFICATION_INTERVAL = 1000; // 1 second minimum interval (short for debugging)
 
     constructor(
         private context: vscode.ExtensionContext,
-        private onTrigger: (document: vscode.TextDocument) => void
+        private onTrigger: (document: vscode.TextDocument) => void,
+        private suppressionManager?: SuppressionManager
     ) { }
 
     public activate(): void {
@@ -73,21 +76,45 @@ export class TriggerManager {
         };
     }
 
-    private shouldShowNotification(): boolean {
+    private shouldShowNotification(filePath: string, triggerType: string): boolean {
         const now = Date.now();
-        console.log(`[code-mantra] Notification throttle check: ${now - this.lastNotificationTime}ms since last notification (min: ${this.MIN_NOTIFICATION_INTERVAL}ms)`);
-        if (now - this.lastNotificationTime < this.MIN_NOTIFICATION_INTERVAL) {
-            console.log('[code-mantra] Notification throttled');
+
+        // Check suppression manager first
+        if (this.suppressionManager?.shouldSuppress(filePath, triggerType)) {
+            console.log(`[TriggerManager] ${triggerType} suppressed by SuppressionManager for ${filePath}`);
             return false;
         }
-        this.lastNotificationTime = now;
+
+        // Check per-file per-trigger throttling
+        let fileNotifications = this.lastNotificationTimes.get(filePath);
+        if (!fileNotifications) {
+            fileNotifications = new Map<string, number>();
+            this.lastNotificationTimes.set(filePath, fileNotifications);
+        }
+
+        const lastTime = fileNotifications.get(triggerType) || 0;
+        const timeSinceLastNotification = now - lastTime;
+
+        console.log(`[TriggerManager] ${triggerType} throttle check for ${filePath}: ${timeSinceLastNotification}ms since last (min: ${this.MIN_NOTIFICATION_INTERVAL}ms)`);
+
+        if (timeSinceLastNotification < this.MIN_NOTIFICATION_INTERVAL) {
+            console.log(`[TriggerManager] ${triggerType} throttled for ${filePath}`);
+            return false;
+        }
+
+        fileNotifications.set(triggerType, now);
+
+        // Record in suppression manager
+        this.suppressionManager?.recordNotification(filePath, triggerType);
+
         return true;
     }
 
     private registerOnSave(): void {
         const listener = vscode.workspace.onDidSaveTextDocument((document) => {
-            console.log(`[code-mantra] onSave event triggered for: ${document.uri.fsPath}`);
-            if (this.shouldShowNotification()) {
+            const filePath = document.uri.fsPath;
+            console.log(`[code-mantra] onSave event triggered for: ${filePath}`);
+            if (this.shouldShowNotification(filePath, 'onSave')) {
                 this.onTrigger(document);
             }
         });
@@ -102,7 +129,8 @@ export class TriggerManager {
             }
 
             this.editDebounceTimer = setTimeout(() => {
-                if (this.shouldShowNotification()) {
+                const filePath = event.document.uri.fsPath;
+                if (this.shouldShowNotification(filePath, 'onEdit')) {
                     this.onTrigger(event.document);
                 }
             }, delay);
@@ -113,7 +141,8 @@ export class TriggerManager {
 
     private registerOnOpen(): void {
         const listener = vscode.workspace.onDidOpenTextDocument((document) => {
-            if (this.shouldShowNotification()) {
+            const filePath = document.uri.fsPath;
+            if (this.shouldShowNotification(filePath, 'onOpen')) {
                 this.onTrigger(document);
             }
         });
@@ -123,8 +152,11 @@ export class TriggerManager {
 
     private registerOnFocus(): void {
         const listener = vscode.window.onDidChangeActiveTextEditor((editor) => {
-            if (editor && this.shouldShowNotification()) {
-                this.onTrigger(editor.document);
+            if (editor) {
+                const filePath = editor.document.uri.fsPath;
+                if (this.shouldShowNotification(filePath, 'onFocus')) {
+                    this.onTrigger(editor.document);
+                }
             }
         });
         this.disposables.push(listener);

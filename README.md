@@ -105,6 +105,90 @@ When you save a file, Code Mantra will randomly show one of the configured princ
 
 Open the Command Palette and run `Code Mantra: Test Notification` to preview how toasts will appear in your editor.
 
+## 🔔 Notification Priority and Suppression
+
+Code Mantra uses smart notification suppression to prevent annoying duplicate notifications when multiple triggers fire at the same time.
+
+### Understanding the Suppression Rules
+
+To help you build better coding habits without notification fatigue, Code Mantra implements the following rules:
+
+#### Rule 1: File Creation Suppression (onCreate → onSave)
+
+When you create a new file and immediately save it, you'll see one notification instead of two:
+
+```
+✓ File created notification
+✗ Save notification (suppressed for 500ms)
+```
+
+**Example:**
+
+1. Create a new file using File → New File
+2. Type some code
+3. Save the file immediately (within 0.5 seconds)
+
+→ Result: Only "New file created" notification, no duplicate "saved" notification
+
+**Note:** If you create a file, wait more than 0.5 seconds, then save, you'll see both notifications.
+
+#### Rule 2: Edit Suppression (onSave → onEdit)
+
+When you save a file, edit triggers are suppressed for 500ms to prevent notifications from overlapping:
+
+```
+✓ Save notification
+✗ Edit notification (if within 500ms of save)
+```
+
+**Example:**
+
+1. Edit code for 3 seconds
+2. Save the file
+3. If your onEdit trigger fires within 0.5 seconds of the save event, it will be suppressed
+
+#### Rule 3: Save Operation Protection
+
+During file saves (when formatters or other plugins are modifying the file), all change-based triggers are suppressed:
+
+- onLargeDelete notifications won't fire during save operations
+- onEdit notifications are suppressed while the file is being saved
+- This prevents false positives from formatter-induced changes (e.g., Prettier auto-formatting)
+
+### Trigger Types and When They Fire
+
+| Trigger                | When it fires                                       | Suppressed by                     |
+| ---------------------- | --------------------------------------------------- | --------------------------------- |
+| **onCreate**           | When a new file is created in your workspace        | (none)                            |
+| **onSave**             | When you save a file                                | onCreate (for 500ms after create) |
+| **onLargeDelete**      | When you delete 100+ lines in one operation         | Save operations                   |
+| **onFileSizeExceeded** | When a file crosses the line count threshold        | Save operations                   |
+| **onEdit**             | After you stop editing for 5 seconds (configurable) | onSave (for 500ms after save)     |
+
+### Default Thresholds
+
+- **Large Delete Threshold:** 100 lines
+- **File Size Threshold:** 300 lines
+- **Edit Debounce:** 5 seconds
+- **Suppression Window:** 500ms
+
+### Customizing Suppression Behavior
+
+_(Future feature: Configuration support coming soon)_
+
+Currently, suppression rules are fixed. Future versions may allow customization through settings.
+
+<details>
+<summary>🔧 Technical Details: Suppression Timing</summary>
+
+The suppression window is 500ms for onCreate→onSave and onSave→onEdit rules. This timing was chosen to handle:
+
+- Auto-formatting plugins (Prettier, Beautifier, etc.)
+- Rapid consecutive actions
+- Debounce completion timing for edit triggers
+
+</details>
+
 ## Configuration
 
 ### Using VS Code Settings UI (Recommended)
