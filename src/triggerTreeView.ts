@@ -164,6 +164,11 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
         console.log('[code-mantra] Found rules:', rules.length);
         console.log('[code-mantra] Rules detail:', JSON.stringify(rules, null, 2));
 
+        // 各ルールのtriggerとenabledをログ出力
+        rules.forEach((rule, index) => {
+            console.log(`[code-mantra] Rule ${index}: trigger=${rule.trigger}, enabled=${rule.enabled}`);
+        });
+
         if (rules.length === 0) {
             console.log('[code-mantra] No rules found, returning empty array');
             return [];
@@ -188,7 +193,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
         rules.push(trigger);
         console.log('[code-mantra] Rules after push:', rules.length);
 
-        await config.update('rules', rules, vscode.ConfigurationTarget.Global);
+        await config.update('rules', rules, vscode.ConfigurationTarget.Workspace);
         console.log('[code-mantra] Configuration updated');
 
         this.refresh();
@@ -203,7 +208,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
 
         if (index >= 0 && index < rules.length) {
             rules[index] = trigger;
-            await config.update('rules', rules, vscode.ConfigurationTarget.Global);
+            await config.update('rules', rules, vscode.ConfigurationTarget.Workspace);
             this.refresh();
             vscode.window.showInformationMessage(`Updated trigger "${trigger.message}"`);
         }
@@ -216,7 +221,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
         if (index >= 0 && index < rules.length) {
             const deletedRule = rules[index];
             rules.splice(index, 1);
-            await config.update('rules', rules, vscode.ConfigurationTarget.Global);
+            await config.update('rules', rules, vscode.ConfigurationTarget.Workspace);
             this.refresh();
             vscode.window.showInformationMessage(`Deleted trigger "${deletedRule.message}"`);
         }
@@ -228,7 +233,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
 
         if (index >= 0 && index < rules.length) {
             rules[index].enabled = !(rules[index].enabled ?? true);
-            await config.update('rules', rules, vscode.ConfigurationTarget.Global);
+            await config.update('rules', rules, vscode.ConfigurationTarget.Workspace);
             this.refresh();
 
             const status = rules[index].enabled ? 'enabled' : 'disabled';
@@ -246,7 +251,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
 
         [rules[index - 1], rules[index]] = [rules[index], rules[index - 1]];
 
-        await config.update('rules', rules, vscode.ConfigurationTarget.Global);
+        await config.update('rules', rules, vscode.ConfigurationTarget.Workspace);
         this.refresh();
     }
 
@@ -260,7 +265,7 @@ export class TriggerTreeDataProvider implements vscode.TreeDataProvider<TriggerT
 
         [rules[index], rules[index + 1]] = [rules[index + 1], rules[index]];
 
-        await config.update('rules', rules, vscode.ConfigurationTarget.Global);
+        await config.update('rules', rules, vscode.ConfigurationTarget.Workspace);
         this.refresh();
     }
 }
